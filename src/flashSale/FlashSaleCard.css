@@ -1,0 +1,72 @@
+.flash-card{
+
+    position:relative;
+    background:white;
+    border:1px solid #eee;
+    border-radius:10px;
+    padding:20px;
+    text-align:center;
+    transition:.3s;
+}
+
+.flash-card:hover{
+
+    transform:translateY(-5px);
+    box-shadow:0 10px 20px rgba(0,0,0,.1);
+
+}
+
+.flash-card img{
+
+    width:170px;
+    height:170px;
+    object-fit:contain;
+
+}
+
+.sale-badge{
+
+    position:absolute;
+    top:10px;
+    left:10px;
+    background:red;
+    color:white;
+    padding:5px 10px;
+    border-radius:5px;
+    font-size:14px;
+}
+
+.price{
+
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin:15px 0;
+
+}
+
+.new-price{
+
+    color:#f85606;
+    font-weight:bold;
+
+}
+
+.old-price{
+
+    text-decoration:line-through;
+    color:gray;
+
+}
+
+.flash-card button{
+
+    width:100%;
+    padding:12px;
+    border:none;
+    background:#f85606;
+    color:white;
+    border-radius:5px;
+    cursor:pointer;
+
+}

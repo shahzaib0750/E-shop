@@ -1,0 +1,145 @@
+.checkout-page {
+  padding: 60px 20px;
+  background: #f7f7f7;
+  min-height: 70vh;
+}
+
+.checkout-container {
+  max-width: 1200px;
+  margin: auto;
+}
+
+.checkout-container > h1 {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.checkout-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+  align-items: start;
+}
+
+.checkout-section,
+.order-summary {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+  border: 1px solid #e5e5e5;
+}
+
+.checkout-section h2,
+.order-summary h2 {
+  margin-bottom: 25px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  margin-bottom: 7px;
+  font-weight: 500;
+}
+
+.form-group input {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+  outline: none;
+}
+
+.form-group input:focus {
+  border-color: #ff6600;
+}
+
+.payment-option {
+  display: block;
+  padding: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.payment-option input {
+  margin-right: 10px;
+}
+
+.checkout-product {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.checkout-product img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.checkout-product h3 {
+  font-size: 15px;
+  margin-bottom: 5px;
+}
+
+.checkout-product p {
+  font-size: 13px;
+  color: #777;
+}
+
+.checkout-line,
+.checkout-total {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.checkout-total {
+  padding-top: 20px;
+  border-top: 1px solid #ddd;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.place-order-btn {
+  width: 100%;
+  padding: 15px;
+  margin-top: 25px;
+  border: none;
+  border-radius: 6px;
+  background: #ff6600;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.place-order-btn:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .checkout-content {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

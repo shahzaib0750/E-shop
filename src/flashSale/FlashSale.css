@@ -1,0 +1,56 @@
+.flash-sale{
+    background:#fff;
+    padding:70px 0;
+}
+
+.flash-sale .flash-container{
+    max-width:1200px;
+    margin:auto;
+    padding:0 20px;
+}
+
+.flash-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.flash-header h2{
+    color:#f85606;
+}
+
+.shop-btn{
+    background:#f85606;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.countdown{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    margin-bottom:30px;
+}
+
+.timer{
+    display:flex;
+    gap:10px;
+}
+
+.timer span{
+    background:#f85606;
+    color:white;
+    padding:8px 12px;
+    border-radius:5px;
+    font-weight:bold;
+}
+
+.flash-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:25px;
+}

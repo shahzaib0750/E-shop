@@ -1,0 +1,70 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+.account-page{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#f5f5f5;
+    padding:20px;
+}
+
+.account-card{
+    width:420px;
+    background:white;
+    padding:40px;
+    border-radius:12px;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+    text-align:center;
+}
+
+.account-card h1{
+    font-size:32px;
+    margin-bottom:15px;
+    color:#222;
+}
+
+.account-card p{
+    color:#666;
+    line-height:1.6;
+    margin-bottom:35px;
+}
+
+.account-buttons{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+.account-buttons a{
+    text-decoration:none;
+    padding:14px;
+    border-radius:8px;
+    font-size:16px;
+    font-weight:600;
+    transition:.3s;
+}
+
+.login-btn{
+    background:#ff6600;
+    color:white;
+}
+
+.login-btn:hover{
+    background:#e65c00;
+}
+
+.signup-btn{
+    border:2px solid #ff6600;
+    color:#ff6600;
+    background:white;
+}
+
+.signup-btn:hover{
+    background:#ff6600;
+    color:white;
+}

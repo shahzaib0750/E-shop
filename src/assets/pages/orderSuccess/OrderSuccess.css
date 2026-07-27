@@ -1,0 +1,78 @@
+.order-success {
+  min-height: 70vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  background: #f7f7f7;
+}
+
+.success-container {
+  background: white;
+  width: 100%;
+  max-width: 650px;
+  text-align: center;
+  padding: 50px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.success-icon {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #28a745;
+  color: white;
+
+  font-size: 40px;
+  font-weight: bold;
+}
+
+.success-container h1 {
+  margin-bottom: 15px;
+}
+
+.success-container p {
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.order-number {
+  color: #222 !important;
+  margin-top: 25px;
+}
+
+.success-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.success-buttons a {
+  padding: 13px 22px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.view-orders-btn {
+  background: #ff6600;
+  color: white;
+}
+
+.continue-shopping-btn {
+  border: 1px solid #ff6600;
+  color: #ff6600;
+}
+
+@media (max-width: 600px) {
+  .success-buttons {
+    flex-direction: column;
+  }
+}

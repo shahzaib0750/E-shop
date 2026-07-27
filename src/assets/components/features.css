@@ -1,0 +1,46 @@
+.features {
+  padding: 30px 0;
+  background: #fff;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.feature-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.feature-icon {
+  width: 55px;
+  height: 55px;
+
+  border-radius: 50%;
+  background: #f85606;
+  color: white;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 24px;
+}
+
+.feature-info h3 {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+.feature-info p {
+  font-size: 14px;
+  color: #777;
+}
