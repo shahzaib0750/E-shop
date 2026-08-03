@@ -1,69 +1,105 @@
 import "./Cart.css";
 
+import { useEffect, useState } from "react";
+
 import Navbar from "../../components/navbar";
 import Footer from "../../Footer/footer";
 
 import CartItem from "../../components/CartItems";
 import CartSummary from "../../components/CartSummary";
 
-const cartItems = [
-  {
-    id: 1,
-    name: "iPhone 16 Pro",
-    image: "/images/hero.jpg",
-    price: 999,
-    quantity: 1,
-  },
-  {
-    id: 2,
-    name: "MacBook Air",
-    image: "/images/hero.jpg",
-    price: 1299,
-    quantity: 2,
-  },
-];
-
 function Cart() {
 
-  const subtotal = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
+    const [cartItems, setCartItems] = useState([]);
 
-  return (
-    <>
-      <Navbar />
+    const loadCart = async () => {
 
-      <section className="cart-page">
+        const user = JSON.parse(localStorage.getItem("user"));
 
-        <div className="container">
+        if (!user) return;
 
-          <h1>Shopping Cart</h1>
+        try {
 
-          <div className="cart-container">
+            const response = await fetch(
+                `http://127.0.0.1:8000/cart/${user.id}`
+            );
 
-            <div className="cart-items">
+            const data = await response.json();
 
-              {cartItems.map((item) => (
-                <CartItem
-                  key={item.id}
-                  item={item}
-                />
-              ))}
+            setCartItems(data);
 
-            </div>
+        } catch (error) {
 
-            <CartSummary subtotal={subtotal} />
+            console.error(error);
 
-          </div>
+        }
 
-        </div>
+    };
 
-      </section>
+    useEffect(() => {
 
-      <Footer />
-    </>
-  );
+        loadCart();
+
+    }, []);
+
+    const subtotal = cartItems.reduce(
+
+        (total, item) => total + Number(item.price) * Number(item.quantity),
+
+        0
+
+    );
+
+    return (
+
+        <>
+
+            <Navbar />
+
+            <section className="cart-page">
+
+                <div className="container">
+
+                    <h1>Shopping Cart</h1>
+
+                    <div className="cart-container">
+
+                        <div className="cart-items">
+
+                            {cartItems.length === 0 ? (
+
+                                <h2>Your cart is empty.</h2>
+
+                            ) : (
+
+                                cartItems.map((item) => (
+
+                                    <CartItem
+                                        key={item.cart_id}
+                                        item={item}
+                                        onCartUpdate={loadCart}
+                                    />
+
+                                ))
+
+                            )}
+
+                        </div>
+
+                        <CartSummary subtotal={subtotal} />
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <Footer />
+
+        </>
+
+    );
+
 }
 
 export default Cart;

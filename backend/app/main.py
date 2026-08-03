@@ -2,14 +2,21 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
-from app.models.user import User
+
+# Import Routers
 from app.routes.account import router as account_router
+from app.routes.product import router as product_router
+from app.routes.cart import router as cart_router
+from app.routes.orders import router as orders_router
+from app.routes.chatbot import router as chatbot_router
 
-app = FastAPI()
+app = FastAPI(
+    title="E-Shop API",
+    version="1.0.0"
+)
 
-
+# Create Database Tables
 Base.metadata.create_all(bind=engine)
-
 
 origins = [
     "http://localhost:5173",
@@ -24,9 +31,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+# Register Routers
 app.include_router(account_router)
+app.include_router(product_router)
+app.include_router(cart_router)
+app.include_router(orders_router)
+app.include_router(chatbot_router)
+
 
 @app.get("/")
 def home():
-    return {"message": "E-Shop API Running"}
+    return {
+        "message": "E-Shop API Running"
+    }

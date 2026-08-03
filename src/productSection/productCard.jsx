@@ -2,41 +2,91 @@ import "./productCard.css";
 import { FaShoppingCart, FaStar } from "react-icons/fa";
 
 function ProductCard({ product }) {
-  return (
-    <div className="product-card">
 
-      <div className="product-image">
-        <img src={product.image} alt={product.name} />
+  const handleAddToCart = async () => {
+
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!user) {
+      alert("Please login first.");
+      return;
+    }
+
+    try {
+
+      const response = await fetch(
+        "http://127.0.0.1:8000/cart",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: user.id,
+            product_id: product.id,
+            quantity: 1,
+          }),
+        }
+      );
+      console.log(response.status);
+      const data = await response.json();
+      console.log(data);
+
+      if (response.ok) {
+
+        alert("Product added to cart.");
+
+      } else {
+
+        alert(data.detail || "Unable to add product.");
+
+      }
+
+    } catch (error) {
+
+      console.error(error);
+      alert("Unable to connect to server.");
+
+    }
+
+  };
+
+  return (
+
+    <div className="home-product-card">
+
+      <div className="home-product-image">
+
+        <img
+          src={product.image}
+          alt={product.name}
+        />
+
       </div>
 
-      <div className="product-details">
+      <div className="home-product-details">
 
-        <h3 className="product-name">
+        <h3 className="home-product-name">
           {product.name}
         </h3>
 
-        <p className="product-category">
+        <p className="home-product-category">
           {product.category}
-
-          
         </p>
 
-        <div className="product-price">
-          <span className="current-price">
-            ${product.price}
-          </span>
-
-          {/* <span className="old-price">
-            ${product.oldPrice}
-          </span> */}
+        <div className="home-product-price">
+          ${product.price}
         </div>
 
-        <div className="product-rating">
+        <div className="home-product-rating">
           <FaStar />
-          <span>{product.rating}</span>
+          <span>{product.rating || "5.0"}</span>
         </div>
 
-        <button className="cart-btn">
+        <button
+          className="home-cart-btn"
+          onClick={handleAddToCart}
+        >
           <FaShoppingCart />
           Add to Cart
         </button>
@@ -44,7 +94,9 @@ function ProductCard({ product }) {
       </div>
 
     </div>
+
   );
+
 }
 
 export default ProductCard;

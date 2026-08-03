@@ -3,7 +3,7 @@ import "./NewArrivals.css";
 import Navbar from "../../components/navbar";
 import Footer from "../../Footer/footer";
 
-import ProductCard from "../../productSection/productCard";
+import ProductCard from "../../../productSection/productCard";
 import newArrivals from "../../data/newArrivals";
 
 function NewArrivals() {

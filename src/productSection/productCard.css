@@ -1,62 +1,90 @@
-.product-card {
-
-    background: white;
+.home-product-card {
+    background: #fff;
     border-radius: 12px;
-    text-align: center;
     overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
     transition: .3s;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.home-product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .15);
+}
+
+.home-product-image {
+    width: 100%;
+    height: 220px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    background: #fff;
+}
+
+.home-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.home-product-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+    text-align: center;
+}
+
+.home-product-name {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #222;
+}
+
+.home-product-category {
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.home-product-price {
+    font-size: 24px;
+    font-weight: bold;
+    color: #f85606;
+    margin: 15px 0;
+}
+
+.current-price {
+    color: #f85606;
+}
+
+.home-product-rating {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    color: #ffc107;
+    margin-bottom: 15px;
+}
+
+.home-cart-btn {
+    width: 100%;
+    padding: 12px;
+    background: #f85606;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
     cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0,0,0,.08);
-
+    font-size: 15px;
+    font-weight: 600;
+    transition: .3s;
+    margin-top: auto;
 }
 
-.product-card:hover{
-
-    transform: translateY(-8px);
-    box-shadow:0 10px 25px rgba(0,0,0,.15);
-
-}
-
-.product-image{
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    height:250px;
-
-    padding:10px;
-
-}
-
-.product-image img{
-
-    width:180px;
-
-    object-fit:contain;
-
-}
-
-.product-card button{
-
-    width:90%;
-
-    margin:10px auto;
-
-    display:block;
-
-    padding:12px;
-
-    background:#f85606;
-
-    color:white;
-
-    border:none;
-
-    border-radius:8px;
-
-    cursor:pointer;
-
+.home-cart-btn:hover {
+    background: #d94b02;
 }
