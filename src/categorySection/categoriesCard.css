@@ -12,6 +12,15 @@
     transform: translateY(-8px);
     box-shadow: 0 10px 25px rgba(0,0,0,.1);
 }
+.category-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.category-card {
+    cursor: pointer;
+}
 
 .category-image {
     width: 100px;

@@ -2,193 +2,569 @@ import "./CheckOut.css";
 
 import Navbar from "../../components/navbar";
 import Footer from "../../Footer/footer";
+
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Checkout() {
-  const cartItems = [
-    {
-      id: 1,
-      name: "iPhone 16 Pro",
-      price: 999,
-      quantity: 1,
-      image: "/images/hero.jpg",
-    },
-    {
-      id: 2,
-      name: "MacBook Air",
-      price: 1299,
-      quantity: 2,
-      image: "/images/hero.jpg",
-    },
-  ];
+function CheckOut() {
+
+  const navigate = useNavigate();
+
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [placingOrder, setPlacingOrder] = useState(false);
+  const [error, setError] = useState("");
+
+  const [formData, setFormData] = useState({
+    full_name: "",
+    phone: "",
+    address: "",
+    city: "",
+    postal_code: "",
+  });
+
+
+  useEffect(() => {
+
+    const fetchCart = async () => {
+
+      try {
+
+        const user = JSON.parse(
+          localStorage.getItem("user")
+        );
+
+        if (!user) {
+
+          setError("Please login before checkout.");
+
+          setLoading(false);
+
+          return;
+        }
+
+
+        setFormData((previous) => ({
+          ...previous,
+          full_name: user.full_name || "",
+          phone: user.phone || "",
+        }));
+
+
+        const response = await fetch(
+          `http://127.0.0.1:8000/cart/${user.id}`
+        );
+
+
+        const data = await response.json();
+
+
+        if (!response.ok) {
+
+          setError(
+            data.detail || "Unable to load cart."
+          );
+
+          return;
+        }
+
+
+        setCartItems(data);
+
+      } catch (error) {
+
+        console.error(
+          "Checkout cart error:",
+          error
+        );
+
+        setError(
+          "Unable to connect to server."
+        );
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+    };
+
+
+    fetchCart();
+
+  }, []);
+
+
+  const handleChange = (e) => {
+
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+
+  };
+
 
   const subtotal = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
+    (total, item) =>
+      total +
+      Number(item.price) *
+      Number(item.quantity),
     0
   );
 
-  const shipping = 0;
-  const total = subtotal + shipping;
-  const navigate = useNavigate();
 
-  return (
-    <>
-      <Navbar />
+  const handlePlaceOrder = async (e) => {
 
-      <main className="checkout-page">
-        <div className="checkout-container">
+    e.preventDefault();
 
-          <h1>Checkout</h1>
 
-          <div className="checkout-content">
+    if (cartItems.length === 0) {
 
-            {/* LEFT SIDE */}
-            <div className="checkout-left">
+      alert("Your cart is empty.");
 
-              <section className="checkout-section">
-                <h2>Delivery Information</h2>
+      return;
+    }
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>First Name</label>
-                    <input type="text" placeholder="First Name" />
-                  </div>
 
-                  <div className="form-group">
-                    <label>Last Name</label>
-                    <input type="text" placeholder="Last Name" />
-                  </div>
-                </div>
+    const user = JSON.parse(
+      localStorage.getItem("user")
+    );
 
-                <div className="form-group">
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    placeholder="example@email.com"
-                  />
-                </div>
 
-                <div className="form-group">
-                  <label>Phone Number</label>
-                  <input
-                    type="tel"
-                    placeholder="Phone Number"
-                  />
-                </div>
+    if (!user) {
 
-                <div className="form-group">
-                  <label>Address</label>
-                  <input
-                    type="text"
-                    placeholder="Street address"
-                  />
-                </div>
+      alert("Please login first.");
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>City</label>
-                    <input type="text" placeholder="City" />
-                  </div>
+      navigate("/login");
 
-                  <div className="form-group">
-                    <label>Postal Code</label>
-                    <input
-                      type="text"
-                      placeholder="Postal Code"
-                    />
-                  </div>
-                </div>
+      return;
+    }
 
-              </section>
 
-              {/* PAYMENT */}
-              <section className="checkout-section">
-                <h2>Payment Method</h2>
+    setPlacingOrder(true);
 
-                <label className="payment-option">
-                  <input
-                    type="radio"
-                    name="payment"
-                    defaultChecked
-                  />
-                  Cash on Delivery
-                </label>
 
-                <label className="payment-option">
-                  <input
-                    type="radio"
-                    name="payment"
-                  />
-                  Credit / Debit Card
-                </label>
-              </section>
+    try {
 
-            </div>
+      const response = await fetch(
+        "http://127.0.0.1:8000/orders",
+        {
+          method: "POST",
 
-            {/* RIGHT SIDE */}
-            <div className="checkout-right">
+          headers: {
+            "Content-Type": "application/json",
+          },
 
-              <div className="order-summary">
+          body: JSON.stringify({
+            user_id: user.id,
+          }),
+        }
+      );
 
-                <h2>Your Order</h2>
 
-                {cartItems.map((item) => (
-                  <div
-                    className="checkout-product"
-                    key={item.id}
-                  >
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                    />
+      const data = await response.json();
 
-                    <div>
-                      <h3>{item.name}</h3>
-                      <p>
-                        Qty: {item.quantity}
-                      </p>
-                    </div>
 
-                    <strong>
-                      ${item.price * item.quantity}
-                    </strong>
-                  </div>
-                ))}
+      console.log(
+        "Order response:",
+        data
+      );
 
-                <div className="checkout-line">
-                  <span>Subtotal</span>
-                  <span>${subtotal}</span>
-                </div>
 
-                <div className="checkout-line">
-                  <span>Shipping</span>
-                  <span>
-                    {shipping === 0 ? "Free" : `$${shipping}`}
-                  </span>
-                </div>
+      if (!response.ok) {
 
-                <div className="checkout-total">
-                  <span>Total</span>
-                  <span>${total}</span>
-                </div>
+        alert(
+          data.detail ||
+          "Unable to place order."
+        );
 
-                <button className="place-order-btn"
-                onClick={() => navigate("/order-success")}>
-                                    Place Order
-                                          </button>
+        return;
+      }
 
-              </div>
+
+      navigate("/order-success", {
+        state: {
+          orderId: data.order_id,
+          totalAmount: data.total_amount,
+        },
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Place order error:",
+        error
+      );
+
+      alert(
+        "Unable to connect to server."
+      );
+
+    } finally {
+
+      setPlacingOrder(false);
+
+    }
+
+  };
+
+
+  if (loading) {
+
+    return (
+      <>
+        <Navbar />
+
+        <section className="checkout-page">
+
+          <div className="checkout-container">
+
+            <h1>Checkout</h1>
+
+            <h3>Loading checkout...</h3>
+
+          </div>
+
+        </section>
+
+        <Footer />
+      </>
+    );
+
+  }
+
+
+  if (error) {
+
+    return (
+      <>
+        <Navbar />
+
+        <section className="checkout-page">
+
+          <div className="checkout-container">
+
+            <h1>Checkout</h1>
+
+            <div className="checkout-error">
+
+              <h3>{error}</h3>
 
             </div>
 
           </div>
 
+        </section>
+
+        <Footer />
+      </>
+    );
+
+  }
+
+
+  return (
+
+    <>
+      <Navbar />
+
+
+      <section className="checkout-page">
+
+        <div className="checkout-container">
+
+          <h1>Checkout</h1>
+
+
+          {cartItems.length === 0 ? (
+
+            <div className="empty-checkout">
+
+              <h2>Your cart is empty.</h2>
+
+              <button
+                type="button"
+                onClick={() => navigate("/")}
+              >
+                Continue Shopping
+              </button>
+
+            </div>
+
+          ) : (
+
+            <form
+              className="checkout-content"
+              onSubmit={handlePlaceOrder}
+            >
+
+
+              <div className="checkout-left">
+
+
+                <div className="checkout-box">
+
+                  <h2>Delivery Information</h2>
+
+
+                  <div className="form-group">
+
+                    <label>
+                      Full Name
+                    </label>
+
+                    <input
+                      type="text"
+                      name="full_name"
+                      value={formData.full_name}
+                      onChange={handleChange}
+                      placeholder="Enter your full name"
+                      required
+                    />
+
+                  </div>
+
+
+                  <div className="form-group">
+
+                    <label>
+                      Phone Number
+                    </label>
+
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="Enter your phone number"
+                      required
+                    />
+
+                  </div>
+
+
+                  <div className="form-group">
+
+                    <label>
+                      Address
+                    </label>
+
+                    <textarea
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      placeholder="Enter your complete address"
+                      rows="4"
+                      required
+                    />
+
+                  </div>
+
+
+                  <div className="checkout-row">
+
+                    <div className="form-group">
+
+                      <label>
+                        City
+                      </label>
+
+                      <input
+                        type="text"
+                        name="city"
+                        value={formData.city}
+                        onChange={handleChange}
+                        placeholder="City"
+                        required
+                      />
+
+                    </div>
+
+
+                    <div className="form-group">
+
+                      <label>
+                        Postal Code
+                      </label>
+
+                      <input
+                        type="text"
+                        name="postal_code"
+                        value={formData.postal_code}
+                        onChange={handleChange}
+                        placeholder="Postal Code"
+                        required
+                      />
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+                <div className="checkout-box">
+
+                  <h2>Payment Method</h2>
+
+                  <div className="payment-option">
+
+                    <input
+                      type="radio"
+                      id="cod"
+                      name="payment"
+                      value="cod"
+                      defaultChecked
+                    />
+
+                    <label htmlFor="cod">
+                      Cash on Delivery
+                    </label>
+
+                  </div>
+
+                </div>
+
+
+              </div>
+
+
+              <div className="checkout-right">
+
+                <div className="checkout-box order-summary">
+
+                  <h2>
+                    Order Summary
+                  </h2>
+
+
+                  <div className="checkout-products">
+
+                    {cartItems.map((item) => (
+
+                      <div
+                        className="checkout-product"
+                        key={item.cart_id}
+                      >
+
+                        <img
+  src={
+    item.image
+      ? (
+          item.image.startsWith("http")
+            ? item.image
+            : `/images/${item.image}`
+        )
+      : "https://placehold.co/100x100?text=No+Image"
+  }
+  alt={item.name}
+/>
+
+
+                        <div>
+
+                          <h3>
+                            {item.name}
+                          </h3>
+
+                          <p>
+                            Qty: {item.quantity}
+                          </p>
+
+                        </div>
+
+
+                        <strong>
+                          $
+                          {(
+                            Number(item.price) *
+                            Number(item.quantity)
+                          ).toFixed(2)}
+                        </strong>
+
+                      </div>
+
+                    ))}
+
+                  </div>
+
+
+                  <div className="summary-line">
+
+                    <span>
+                      Subtotal
+                    </span>
+
+                    <span>
+                      ${subtotal.toFixed(2)}
+                    </span>
+
+                  </div>
+
+
+                  <div className="summary-line">
+
+                    <span>
+                      Delivery
+                    </span>
+
+                    <span>
+                      Free
+                    </span>
+
+                  </div>
+
+
+                  <hr />
+
+
+                  <div className="summary-total">
+
+                    <span>
+                      Total
+                    </span>
+
+                    <strong>
+                      ${subtotal.toFixed(2)}
+                    </strong>
+
+                  </div>
+
+
+                  <button
+                    type="submit"
+                    className="place-order-btn"
+                    disabled={placingOrder}
+                  >
+
+                    {placingOrder
+                      ? "Placing Order..."
+                      : "Place Order"}
+
+                  </button>
+
+                </div>
+
+              </div>
+
+
+            </form>
+
+          )}
+
         </div>
-      </main>
+
+      </section>
+
 
       <Footer />
+
     </>
+
   );
+
 }
 
-export default Checkout;
+export default CheckOut;
