@@ -1,10 +1,37 @@
 import "./categories.css";
 import CategoryCard from "./categoriesCard";
-// import {categories} from '../assets/data/categories';
-
+import { useEffect, useState } from "react";
 
 function Categories() {
+
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+
+    try {
+
+      const response = await fetch(
+        "http://127.0.0.1:8000/categories"
+      );
+
+      const data = await response.json();
+
+      setCategories(data);
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  };
+
   return (
+
     <section className="categories">
 
       <div className="container">
@@ -14,10 +41,12 @@ function Categories() {
         <div className="categories-grid">
 
           {categories.map((category) => (
+
             <CategoryCard
               key={category.id}
               category={category}
             />
+
           ))}
 
         </div>
@@ -25,7 +54,9 @@ function Categories() {
       </div>
 
     </section>
+
   );
+
 }
 
 export default Categories;

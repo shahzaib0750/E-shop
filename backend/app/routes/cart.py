@@ -183,3 +183,24 @@ def remove_from_cart(
         "message": "Product removed from cart",
         "cart_id": cart_id
     }
+
+    # GET CART COUNT
+@router.get("/cart/count/{user_id}")
+def get_cart_count(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+
+    total_items = db.query(Cart).filter(
+        Cart.user_id == user_id
+    ).all()
+
+
+    count = sum(
+        item.quantity for item in total_items
+    )
+
+
+    return {
+        "count": count
+    }

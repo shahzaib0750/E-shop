@@ -20,12 +20,14 @@ import ProductDetails from "./assets/pages/productDetails/ProductDetails";
 import SellerOrders  from "./assets/pages/seller/SellerOrders";
 import SearchResults from "../src/assets/pages/searchResults/SearchResults";
 import ChatBot from "../src/assets/components/chatbot/ChatBot";
-
+import { CartProvider } from "./cartContext/CartContext";
+import CategoryProducts from "../src/assets/pages/categoryProducts/CategoryProducts";
 
 
 
 function App() {
   return (
+    <CartProvider>
     <BrowserRouter>
 
       <Routes>
@@ -79,12 +81,21 @@ function App() {
     element={<SearchResults />}
 />
 
+
+<Route
+    path="/category/:id"
+    element={<CategoryProducts />}
+/>
+
       </Routes>
       <ChatBot/>
     
     
 
     </BrowserRouter>
+
+
+    </CartProvider>
   );
 }
 

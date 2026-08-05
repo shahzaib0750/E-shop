@@ -24,7 +24,7 @@ def create_product(
     new_product = Product(
         name=product.name,
         description=product.description,
-        category=product.category,
+        category_id=product.category_id,
         brand=product.brand,
         price=product.price,
         stock=product.stock,

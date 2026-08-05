@@ -3,6 +3,8 @@ from random import randint, choice
 
 from app.database import SessionLocal
 from app.models.product import Product
+from app.models.categories import Category
+from app.utils.pexels import get_product_image
 
 fake = Faker()
 
@@ -21,38 +23,27 @@ brands = [
     "Huawei"
 ]
 
-categories = [
-    "Mobile",
-    "Laptop",
-    "Watch",
-    "Headphones",
-    "Camera",
-    "Monitor",
-    "Keyboard",
-    "Mouse",
-    "Tablet",
-    "Accessories"
-]
+# Get all categories from database
+categories = db.query(Category).all()
 
-# Seller IDs (assuming sellers have IDs 1-20)
+# Seller IDs
 seller_ids = list(range(1, 21))
 
 for i in range(500):
 
-    category = choice(categories)
     brand = choice(brands)
 
+    category = choice(categories)
+
     product = Product(
-        name=f"{brand} {category} {fake.word().title()}",
+        name=f"{brand} {category.name} {fake.word().title()}",
         brand=brand,
-        category=category,
+        category_id=category.id,
         description=fake.sentence(nb_words=12),
         price=randint(100, 3000),
         stock=randint(1, 100),
 
-        # Random image
-        image=f"https://picsum.photos/400/400?random={i+1}",
-
+        image=get_product_image(f"{brand} {category.name}"),
         seller_id=choice(seller_ids)
     )
 
@@ -61,4 +52,4 @@ for i in range(500):
 db.commit()
 db.close()
 
-print("✅ 500 products inserted successfully.")
+print("500 products inserted successfully.")

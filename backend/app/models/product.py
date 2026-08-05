@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Float, Text
+from sqlalchemy import Column, Integer, String, Float, Text, ForeignKey
+from sqlalchemy.orm import relationship
 
 from app.database import Base
 
@@ -12,7 +13,11 @@ class Product(Base):
 
     description = Column(Text)
 
-    category = Column(String(100))
+    category_id = Column(
+        Integer,
+        ForeignKey("categories.id"),
+        nullable=False
+    )
 
     brand = Column(String(100))
 
@@ -23,3 +28,8 @@ class Product(Base):
     image = Column(String(255))
 
     seller_id = Column(Integer)
+
+    category = relationship(
+        "Category",
+        back_populates="products"
+    )

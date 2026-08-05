@@ -9,6 +9,7 @@ from app.routes.product import router as product_router
 from app.routes.cart import router as cart_router
 from app.routes.orders import router as orders_router
 from app.routes.chatbot import router as chatbot_router
+from app.routes import categories
 
 app = FastAPI(
     title="E-Shop API",
@@ -37,6 +38,7 @@ app.include_router(product_router)
 app.include_router(cart_router)
 app.include_router(orders_router)
 app.include_router(chatbot_router)
+app.include_router(categories.router)
 
 
 @app.get("/")
