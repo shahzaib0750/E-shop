@@ -143,7 +143,7 @@ function AddProduct() {
 
             console.log(error);
 
-            alert("Unable to connect to server.");
+            // alert("Unable to connect to server.");
 
         }
 

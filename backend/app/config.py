@@ -5,4 +5,4 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-print(DATABASE_URL)   # Temporary debug
+print(DATABASE_URL)
