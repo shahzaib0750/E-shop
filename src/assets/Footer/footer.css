@@ -1,67 +1,240 @@
-.footer{
-    background:#1f2937;
-    color:white;
-    margin-top:80px;
+/* =====================================
+   E-SHOP FOOTER
+===================================== */
+
+.eshop-footer {
+    width: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    background: #172033;
+
+    color: #ffffff;
+
+    box-sizing: border-box;
 }
 
-.footer-container{
-    max-width:1200px;
-    margin:auto;
-    padding:60px 20px;
 
-    display:grid;
-    grid-template-columns:2fr 1fr 1fr 1fr;
-    gap:40px;
+/* =====================================
+   MAIN FOOTER
+===================================== */
+
+.eshop-footer-container {
+    width: 100%;
+
+    max-width: 1250px;
+
+    margin: 0 auto;
+
+    padding: 60px 40px;
+
+    box-sizing: border-box;
+
+    display: grid;
+
+    grid-template-columns:
+        1.5fr 1fr 1fr 1fr;
+
+    gap: 50px;
 }
 
-.footer-section h2{
-    color:#f85606;
-    margin-bottom:20px;
+
+/* =====================================
+   FOOTER SECTION
+===================================== */
+
+.eshop-footer-section h2 {
+    margin: 0 0 15px;
+
+    color: #ffffff;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 28px;
+
+    font-weight: 700;
 }
 
-.footer-section h3{
-    margin-bottom:20px;
+
+.eshop-footer-section h3 {
+    margin: 0 0 18px;
+
+    color: #ffffff;
+
+    font-size: 14px;
+
+    font-weight: 700;
 }
 
-.footer-section p{
-    color:#d1d5db;
-    line-height:1.7;
+
+.eshop-footer-section p {
+    max-width: 300px;
+
+    margin: 0;
+
+    color: #aeb7c7;
+
+    font-size: 13px;
+
+    line-height: 1.8;
 }
 
-.footer-section ul{
-    list-style:none;
-    padding:0;
+
+/* =====================================
+   LIST
+===================================== */
+
+.eshop-footer-section ul {
+    margin: 0;
+
+    padding: 0;
+
+    list-style: none;
 }
 
-.footer-section li{
-    margin-bottom:12px;
-    color:#d1d5db;
-    cursor:pointer;
-    transition:.3s;
+
+.eshop-footer-section li {
+    margin-bottom: 11px;
+
+    color: #aeb7c7;
+
+    font-size: 12px;
+
+    cursor: pointer;
+
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
 }
 
-.footer-section li:hover{
-    color:#f85606;
+
+.eshop-footer-section li:hover {
+    color: #ffffff;
+
+    transform: translateX(3px);
 }
 
-.social-icons{
-    display:flex;
-    gap:18px;
-    font-size:24px;
+
+/* =====================================
+   SOCIAL ICONS
+===================================== */
+
+.eshop-social-icons {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
 }
 
-.social-icons svg{
-    cursor:pointer;
-    transition:.3s;
+
+.eshop-social-icons a {
+    width: 36px;
+
+    height: 36px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: 1px solid #39445a;
+
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: #aeb7c7;
+
+    font-size: 15px;
+
+    text-decoration: none;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
 }
 
-.social-icons svg:hover{
-    color:#f85606;
+
+.eshop-social-icons a:hover {
+    background: #7c3aed;
+
+    border-color: #7c3aed;
+
+    color: #ffffff;
+
+    transform: translateY(-2px);
 }
 
-.footer-bottom{
-    border-top:1px solid #374151;
-    text-align:center;
-    padding:20px;
-    color:#9ca3af;
+
+/* =====================================
+   FOOTER BOTTOM
+===================================== */
+
+.eshop-footer-bottom {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 20px;
+
+    border-top: 1px solid #303b50;
+
+    color: #7f8a9d;
+
+    font-size: 11px;
+
+    text-align: center;
+}
+
+
+/* =====================================
+   TABLET
+===================================== */
+
+@media (max-width: 900px) {
+
+    .eshop-footer-container {
+        grid-template-columns:
+            repeat(2, 1fr);
+
+        gap: 40px;
+
+        padding: 50px 30px;
+    }
+}
+
+
+/* =====================================
+   MOBILE
+===================================== */
+
+@media (max-width: 550px) {
+
+    .eshop-footer-container {
+        grid-template-columns: 1fr;
+
+        padding: 45px 20px;
+
+        text-align: center;
+    }
+
+
+    .eshop-footer-section p {
+        max-width: 350px;
+
+        margin: 0 auto;
+    }
+
+
+    .eshop-social-icons {
+        justify-content: center;
+    }
 }

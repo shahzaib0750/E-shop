@@ -1,22 +1,190 @@
+/* =====================================
+   CATEGORIES SECTION
+===================================== */
+
 .categories {
-    padding: 70px 0;
-    background: #fff;
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 65px 40px;
+
+    background: #ffffff;
 }
 
-.categories .container {
-    max-width: 1200px;
+
+/* =====================================
+   CONTAINER
+===================================== */
+
+.categories-container {
+    max-width: 1250px;
+
     margin: 0 auto;
-    padding: 0 20px;
 }
 
-.categories h2 {
+
+/* =====================================
+   HEADER
+===================================== */
+
+.categories-header {
+    margin-bottom: 35px;
+
     text-align: center;
-    margin-bottom: 40px;
-    font-size: 36px;
 }
+
+
+/* Label */
+
+.categories-label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #7c3aed;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+}
+
+
+/* Heading */
+
+.categories-header h2 {
+    margin: 0;
+
+    color: #172033;
+
+    font-family: Georgia, "Times New Roman", serif;
+
+    font-size: 32px;
+
+    font-weight: 700;
+
+    letter-spacing: -0.5px;
+}
+
+
+/* Description */
+
+.categories-header p {
+    max-width: 500px;
+
+    margin: 9px auto 0;
+
+    color: #7a8495;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+
+/* =====================================
+   CATEGORY GRID
+===================================== */
 
 .categories-grid {
     display: grid;
-    grid-template-columns: repeat(4,1fr);
-    gap: 25px;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 20px;
+}
+
+
+/* =====================================
+   LOADING
+===================================== */
+
+.categories-loading {
+    min-height: 180px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: #8a94a6;
+
+    font-size: 13px;
+}
+
+
+/* =====================================
+   EMPTY
+===================================== */
+
+.categories-empty {
+    padding: 50px;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 14px;
+
+    background: #f7f8fc;
+
+    color: #8a94a6;
+
+    font-size: 13px;
+
+    text-align: center;
+}
+
+
+/* =====================================
+   RESPONSIVE
+===================================== */
+
+@media (max-width: 1100px) {
+
+    .categories {
+        padding: 55px 25px;
+    }
+
+    .categories-grid {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+}
+
+
+@media (max-width: 800px) {
+
+    .categories {
+        padding: 50px 20px;
+    }
+
+    .categories-header h2 {
+        font-size: 28px;
+    }
+
+    .categories-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 16px;
+    }
+}
+
+
+@media (max-width: 520px) {
+
+    .categories {
+        padding: 45px 16px;
+    }
+
+    .categories-header h2 {
+        font-size: 25px;
+    }
+
+    .categories-grid {
+        grid-template-columns: 1fr;
+    }
 }

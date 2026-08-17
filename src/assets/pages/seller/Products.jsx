@@ -1,203 +1,200 @@
 import "./Products.css";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import ProductCard from "../../../../src/productSection/productCard";
+
+const LIMIT = 12;
 
 function Products() {
-
     const [products, setProducts] = useState([]);
+    const [page, setPage] = useState(1);
+    const [totalProducts, setTotalProducts] = useState(0);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchProducts();
-    }, []);
+        let cancelled = false;
 
-    const fetchProducts = async () => {
+        const loadProducts = async () => {
+            setLoading(true);
 
-        try {
+            try {
+                const productsResponse = await fetch(
+                    `http://127.0.0.1:8000/products?page=${page}&limit=${LIMIT}`
+                );
 
-            const user = JSON.parse(localStorage.getItem("user"));
+                if (!productsResponse.ok) {
+                    throw new Error("Unable to load products.");
+                }
 
-            if (!user) {
-                alert("Please login first.");
-                return;
+                const productsData = await productsResponse.json();
+
+                const countResponse = await fetch(
+                    "http://127.0.0.1:8000/products/count"
+                );
+
+                if (!countResponse.ok) {
+                    throw new Error("Unable to load product count.");
+                }
+
+                const countData = await countResponse.json();
+
+                if (cancelled) {
+                    return;
+                }
+
+                setProducts(
+                    Array.isArray(productsData) ? productsData : []
+                );
+
+                setTotalProducts(
+                    Number(countData.total) || 0
+                );
+            } catch (error) {
+                if (!cancelled) {
+                    console.error(
+                        "Load products error:",
+                        error
+                    );
+
+                    setProducts([]);
+                    setTotalProducts(0);
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
             }
+        };
 
-            const response = await fetch(
-                `http://127.0.0.1:8000/seller/products/${user.id}`
-            );
+        loadProducts();
 
-            const data = await response.json();
+        return () => {
+            cancelled = true;
+        };
+    }, [page]);
 
-            if (response.ok) {
+    const totalPages = Math.ceil(
+        totalProducts / LIMIT
+    );
 
-                setProducts(data);
-
-            } else {
-
-                alert(data.detail);
-
-            }
-
-        } catch (error) {
-
-            console.log(error);
-            alert("Unable to load products.");
-
-        } finally {
-
-            setLoading(false);
-
+    const goToPreviousPage = () => {
+        if (page > 1) {
+            setPage((currentPage) => currentPage - 1);
         }
-
     };
 
-    const deleteProduct = async (id) => {
-
-        const confirmDelete = window.confirm(
-            "Are you sure you want to delete this product?"
-        );
-
-        if (!confirmDelete) return;
-
-        try {
-
-            const response = await fetch(
-                `http://127.0.0.1:8000/products/${id}`,
-                {
-                    method: "DELETE",
-                }
-            );
-
-            const data = await response.json();
-
-            if (response.ok) {
-
-                alert(data.message);
-
-                fetchProducts();
-
-            } else {
-
-                alert(data.detail);
-
-            }
-
-        } catch (error) {
-
-            console.log(error);
-
-            alert("Unable to delete product.");
-
+    const goToNextPage = () => {
+        if (page < totalPages) {
+            setPage((currentPage) => currentPage + 1);
         }
-
     };
 
     return (
+        <section className="products">
+            <div className="products-container">
 
-        <div className="products-page">
+                <div className="products-header">
+                    <div>
+                        <span className="products-label">
+                            OUR COLLECTION
+                        </span>
 
-            <div className="products-header">
+                        <h2>
+                            Featured Products
+                        </h2>
 
-                <h1>My Products</h1>
+                        <p>
+                            Discover our latest products
+                            and find something you'll love.
+                        </p>
+                    </div>
 
-                <Link to="/seller/add-product">
+                    {!loading && totalProducts > 0 && (
+                        <div className="products-count">
+                            <strong>
+                                {totalProducts}
+                            </strong>
 
-                    <button className="add-btn">
-                        + Add Product
-                    </button>
+                            <span>
+                                Products
+                            </span>
+                        </div>
+                    )}
+                </div>
 
-                </Link>
+                {loading ? (
+                    <div className="products-loading">
+                        <div className="loading-spinner"></div>
 
+                        <p>
+                            Loading products...
+                        </p>
+                    </div>
+                ) : products.length === 0 ? (
+                    <div className="products-empty">
+                        <div className="empty-product-icon">
+                            📦
+                        </div>
+
+                        <h3>
+                            No Products Found
+                        </h3>
+
+                        <p>
+                            There are currently no products
+                            available.
+                        </p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="products-grid">
+                            {products.map((product) => (
+                                <ProductCard
+                                    key={product.id}
+                                    product={product}
+                                />
+                            ))}
+                        </div>
+
+                        {totalPages > 1 && (
+                            <div className="pagination">
+                                <button
+                                    type="button"
+                                    disabled={page === 1}
+                                    onClick={goToPreviousPage}
+                                >
+                                    ← Previous
+                                </button>
+
+                                <div className="pagination-info">
+                                    <span>
+                                        Page
+                                    </span>
+
+                                    <strong>
+                                        {page}
+                                    </strong>
+
+                                    <span>
+                                        of {totalPages}
+                                    </span>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    disabled={
+                                        page === totalPages
+                                    }
+                                    onClick={goToNextPage}
+                                >
+                                    Next →
+                                </button>
+                            </div>
+                        )}
+                    </>
+                )}
             </div>
-
-            {loading ? (
-
-                <h2>Loading Products...</h2>
-
-            ) : products.length === 0 ? (
-
-                <h2>No Products Found.</h2>
-
-            ) : (
-
-                <table className="products-table">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>Image</th>
-                            <th>Product</th>
-                            <th>Category</th>
-                            <th>Price</th>
-                            <th>Stock</th>
-                            <th>Actions</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        {products.map((product) => (
-
-                            <tr key={product.id}>
-
-                                <td>
-
-                                    <img
-                                        src={`/images/${product.image}`}
-                                        alt={product.name}
-                                        className="product-image"
-                                    />
-
-                                </td>
-
-                                <td>{product.name}</td>
-
-                                <td>{product.category}</td>
-
-                                <td>${product.price}</td>
-
-                                <td>{product.stock}</td>
-
-                                <td>
-
-                                    <Link
-                                        to={`/seller/edit-product/${product.id}`}
-                                    >
-
-                                        <button className="edit-btn">
-                                            Edit
-                                        </button>
-
-                                    </Link>
-
-                                    <button
-                                        className="delete-btn"
-                                        onClick={() =>
-                                            deleteProduct(product.id)
-                                        }
-                                    >
-                                        Delete
-                                    </button>
-
-                                </td>
-
-                            </tr>
-
-                        ))}
-
-                    </tbody>
-
-                </table>
-
-            )}
-
-        </div>
-
+        </section>
     );
-
 }
 
 export default Products;

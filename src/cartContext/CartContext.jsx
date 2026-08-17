@@ -1,63 +1,113 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useEffect,
+  useState,
+} from "react";
 
-const CartContext = createContext();
+import { apiFetch } from "../api/api";
+
+const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
+  const [cartCount, setCartCount] = useState(0);
 
-    const [cartCount, setCartCount] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
 
+    const loadCartCount = async () => {
+      const token = localStorage.getItem("token");
 
-    const fetchCartCount = async () => {
-
-    const user = JSON.parse(localStorage.getItem("user"));
-
-    if (!user) {
-        setCartCount(0);
+      if (!token) {
+        if (!cancelled) {
+          setCartCount(0);
+        }
         return;
-    }
+      }
 
-
-    try {
-
-        const response = await fetch(
-            `http://127.0.0.1:8000/cart/count/${user.id}`
+      try {
+        const response = await apiFetch(
+          "/cart/count"
         );
 
+        if (!response.ok) {
+          if (!cancelled) {
+            setCartCount(0);
+          }
+          return;
+        }
 
         const data = await response.json();
 
+        if (!cancelled) {
+          setCartCount(
+            Number(data.count) || 0
+          );
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error(
+            "Cart count error:",
+            error
+          );
 
-        console.log("Backend cart count:", data);
+          setCartCount(0);
+        }
+      }
+    };
 
+    const timer = setTimeout(() => {
+      loadCartCount();
+    }, 0);
 
-        setCartCount(data.count);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, []);
 
+  const refreshCart = async () => {
+    const token = localStorage.getItem("token");
 
-    } catch(error) {
-
-        console.log("Cart count error:", error);
-
+    if (!token) {
+      setCartCount(0);
+      return;
     }
 
-};
-    useEffect(() => {
-        fetchCartCount();
-    }, []);
+    try {
+      const response = await apiFetch(
+        "/cart/count"
+      );
 
+      if (!response.ok) {
+        setCartCount(0);
+        return;
+      }
 
-    return (
-        <CartContext.Provider
-            value={{
-                cartCount,
-                refreshCart: fetchCartCount
-            }}
-        >
-            {children}
-        </CartContext.Provider>
-    );
+      const data = await response.json();
+
+      setCartCount(
+        Number(data.count) || 0
+      );
+    } catch (error) {
+      console.error(
+        "Refresh cart error:",
+        error
+      );
+
+      setCartCount(0);
+    }
+  };
+
+  return (
+    <CartContext.Provider
+      value={{
+        cartCount,
+        refreshCart,
+      }}
+    >
+      {children}
+    </CartContext.Provider>
+  );
 }
 
-
-export function useCart() {
-    return useContext(CartContext);
-}
+export { CartContext };

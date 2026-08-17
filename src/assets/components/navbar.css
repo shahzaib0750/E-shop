@@ -1,111 +1,278 @@
-/* Navbar */
+/* =========================================================
+   E-SHOP NAVBAR
+   ========================================================= */
 
 .navbar {
     width: 100%;
-    height: 75px;
-    background: #fff;
+    min-height: 74px;
+
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 40px;
-    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+
+    box-sizing: border-box;
+
+    /* Balanced desktop spacing */
+    padding: 0 clamp(60px, 7vw, 120px);
+
+    background: #ffffff;
+
+    border-bottom: 1px solid #e8e8ef;
+
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.035);
+
     position: sticky;
     top: 0;
     z-index: 1000;
-    box-sizing: border-box;
+
+    gap: 0;
 }
 
-/* Logo */
+
+/* =========================================================
+   LOGO
+   ========================================================= */
 
 .logo {
-    font-size: 28px;
-    font-weight: bold;
-    color: #f85606;
+    flex-shrink: 0;
+    margin-right: 42px;
 }
 
 .logo a {
+    color: #7c3aed;
+
+    font-family: Georgia, "Times New Roman", serif;
+
+    font-size: 26px;
+    font-weight: 700;
+
+    line-height: 1;
+
     text-decoration: none;
-    color: #f85606;
+
+    letter-spacing: -0.6px;
+
+    transition: color 0.2s ease;
 }
 
-/* Navigation */
+.logo a:hover {
+    color: #6d28d9;
+}
+
+
+/* =========================================================
+   NAVIGATION LINKS
+   ========================================================= */
 
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 30px;
+
+    gap: 27px;
+
+    flex-shrink: 0;
 }
 
 .nav-links a {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    height: 74px;
+
+    color: #667085;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    white-space: nowrap;
+
     text-decoration: none;
-    color: #333;
-    font-size: 16px;
-    font-weight: 500;
-    transition: .3s;
+
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
 }
 
 .nav-links a:hover {
-    color: #f85606;
+    color: #7c3aed;
 }
 
-/* Search */
+
+/* Active-style underline on hover */
+
+.nav-links a::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    bottom: 19px;
+
+    width: 0;
+    height: 2px;
+
+    background: #7c3aed;
+
+    border-radius: 10px;
+
+    transition: width 0.2s ease;
+}
+
+.nav-links a:hover::after {
+    width: 100%;
+}
+
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
 
 .search-box {
+    width: 350px;
+    height: 42px;
+
+    margin-left: auto;
+    margin-right: 20px;
+
     display: flex;
     align-items: center;
-    background: #f5f5f5;
-    border-radius: 25px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #dedee8;
+
+    border-radius: 10px;
+
+    background: #fafafa;
+
     overflow: hidden;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
 }
+
+.search-box:focus-within {
+    background: #ffffff;
+
+    border-color: #8b5cf6;
+
+    box-shadow:
+        0 0 0 3px rgba(124, 58, 237, 0.08);
+}
+
+
+/* Search input */
 
 .search-box input {
+    flex: 1;
+
+    width: 100%;
+    height: 100%;
+
+    padding: 0 15px;
+
     border: none;
     outline: none;
+
     background: transparent;
-    padding: 10px 15px;
-    width: 220px;
-    font-size: 14px;
+
+    color: #273142;
+
+    font-family: inherit;
+    font-size: 13px;
 }
 
+.search-box input::placeholder {
+    color: #9ca3af;
+}
+
+
+/* Search button */
+
 .search-box button {
-    border: none;
-    background: #f85606;
-    color: white;
-    padding: 10px 16px;
-    cursor: pointer;
+    width: 44px;
+    height: 100%;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
+    flex-shrink: 0;
+
+    border: none;
+
+    background: #7c3aed;
+
+    color: #ffffff;
+
+    cursor: pointer;
+
+    transition: background 0.2s ease;
 }
 
 .search-box button:hover {
-    background: #d94a00;
+    background: #6d28d9;
 }
 
-/* Icons */
+.search-box button svg {
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   RIGHT SIDE ICONS
+   ========================================================= */
 
 .nav-icons {
     display: flex;
     align-items: center;
-    gap: 20px;
+
+    gap: 8px;
+
+    flex-shrink: 0;
 }
 
-.nav-icons a {
+.nav-action {
     position: relative;
-    color: #333;
+
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-sizing: border-box;
+
+    border-radius: 9px;
+
+    color: #667085;
+
+    font-size: 16px;
+
     text-decoration: none;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
 }
 
-.icon {
-    font-size: 22px;
-    transition: .3s;
+.nav-action:hover {
+    background: #f5f3ff;
+
+    color: #7c3aed;
+
+    transform: translateY(-1px);
 }
 
-.icon:hover {
-    color: #f85606;
-}
 
-/* Cart Badge */
+/* =========================================================
+   CART BADGE
+   ========================================================= */
 
 .cart-icon {
     position: relative;
@@ -113,44 +280,218 @@
 
 .cart-badge {
     position: absolute;
-    top: -8px;
-    right: -10px;
-    width: 18px;
+
+    top: 1px;
+    right: 0;
+
+    min-width: 18px;
     height: 18px;
-    border-radius: 50%;
-    background: #f85606;
-    color: #fff;
-    font-size: 11px;
+
+    padding: 0 4px;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
+
+    box-sizing: border-box;
+
+    border-radius: 50%;
+
+    background: #f26b21;
+
+    color: #ffffff;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    line-height: 1;
+
+    border: 2px solid #ffffff;
 }
 
-/* Responsive */
 
-@media (max-width: 992px) {
+/* =========================================================
+   LARGE DESKTOP
+   ========================================================= */
+
+@media (max-width: 1250px) {
 
     .navbar {
-        padding: 0 20px;
-    }
-
-    .nav-links {
-        display: none;
-    }
-
-    .search-box input {
-        width: 140px;
-    }
-}
-
-@media (max-width: 576px) {
-
-    .search-box {
-        display: none;
+        padding: 0 45px;
     }
 
     .logo {
+        margin-right: 30px;
+    }
+
+    .nav-links {
+        gap: 20px;
+    }
+
+    .search-box {
+        width: 290px;
+    }
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1050px) {
+
+    .navbar {
+        padding: 0 30px;
+    }
+
+    .logo {
+        margin-right: 25px;
+    }
+
+    .logo a {
+        font-size: 24px;
+    }
+
+    .nav-links {
+        gap: 16px;
+    }
+
+    .nav-links a {
+        font-size: 12px;
+    }
+
+    .search-box {
+        width: 240px;
+    }
+}
+
+
+/* =========================================================
+   SMALL TABLET
+   ========================================================= */
+
+@media (max-width: 850px) {
+
+    .navbar {
+        min-height: 70px;
+
+        padding: 14px 25px;
+
+        flex-wrap: wrap;
+
+        row-gap: 12px;
+    }
+
+    .logo {
+        margin-right: 0;
+    }
+
+    .nav-icons {
+        margin-left: auto;
+    }
+
+    .search-box {
+        order: 3;
+
+        width: 100%;
+        max-width: none;
+
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .nav-links {
+        order: 4;
+
+        width: 100%;
+
+        display: flex;
+
+        justify-content: flex-start;
+
+        gap: 25px;
+
+        overflow-x: auto;
+
+        padding-bottom: 3px;
+
+        scrollbar-width: none;
+    }
+
+    .nav-links::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-links a {
+        height: auto;
+
+        padding: 5px 0;
+
+        font-size: 13px;
+    }
+
+    .nav-links a::after {
+        bottom: -1px;
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    .navbar {
+        min-height: auto;
+
+        padding: 13px 16px;
+
+        row-gap: 10px;
+    }
+
+    .logo a {
         font-size: 22px;
+    }
+
+    .nav-action {
+        width: 38px;
+        height: 38px;
+    }
+
+    .search-box {
+        height: 40px;
+    }
+
+    .nav-links {
+        gap: 22px;
+    }
+
+    .nav-links a {
+        font-size: 12px;
+    }
+}
+
+
+/* =========================================================
+   VERY SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 400px) {
+
+    .navbar {
+        padding: 12px 14px;
+    }
+
+    .logo a {
+        font-size: 21px;
+    }
+
+    .nav-links {
+        gap: 18px;
+    }
+
+    .nav-links a {
+        font-size: 11px;
     }
 }

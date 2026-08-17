@@ -1,49 +1,503 @@
+/* =====================================
+   HERO SECTION
+===================================== */
+
 .hero {
     width: 100%;
-    background: #f5f5f5;
-    padding: 60px 0;
+
+    background: #f7f8fc;
+
+    padding: 55px 40px 65px;
+
+    box-sizing: border-box;
 }
 
-.hero-content {
-    max-width: 1200px;
+
+/* =====================================
+   HERO CONTAINER
+===================================== */
+
+.hero-container {
+    max-width: 1250px;
+
+    min-height: 480px;
+
     margin: 0 auto;
 
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
     align-items: center;
+
+    gap: 60px;
+
+    padding: 45px 55px;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
+
+    border: 1px solid #e8ebef;
+
+    border-radius: 22px;
+
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.045);
 }
+
+
+/* =====================================
+   HERO TEXT
+===================================== */
 
 .hero-text {
-    flex: 1;
+    max-width: 560px;
 }
+
+
+/* Small label */
+
+.hero-label {
+    display: inline-block;
+
+    margin-bottom: 15px;
+
+    color: #7c3aed;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+}
+
+
+/* Heading */
 
 .hero-text h1 {
-    font-size: 48px;
-    margin-bottom: 20px;
+    margin: 0;
+
+    color: #172033;
+
+    font-family: Georgia, "Times New Roman", serif;
+
+    font-size: clamp(38px, 4vw, 56px);
+
+    line-height: 1.08;
+
+    letter-spacing: -1.5px;
 }
+
+.hero-text h1 span {
+    display: block;
+
+    color: #7c3aed;
+}
+
+
+/* Paragraph */
 
 .hero-text p {
-    color: #666;
-    margin-bottom: 30px;
-    line-height: 1.6;
+    max-width: 510px;
+
+    margin: 22px 0 28px;
+
+    color: #718096;
+
+    font-size: 15px;
+
+    line-height: 1.8;
 }
 
-.hero-text button {
-    padding: 14px 30px;
-    background: #f85606;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+
+/* =====================================
+   HERO ACTIONS
+===================================== */
+
+.hero-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 24px;
 }
+
+
+/* Shop button */
+
+.hero-btn {
+    height: 48px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 0 22px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #7c3aed;
+
+    color: #ffffff;
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 7px 18px rgba(124, 58, 237, 0.22);
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.hero-btn:hover {
+    background: #6d28d9;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 10px 22px rgba(124, 58, 237, 0.28);
+}
+
+.hero-btn span {
+    font-size: 18px;
+
+    line-height: 1;
+}
+
+
+/* =====================================
+   TRUST ITEM
+===================================== */
+
+.hero-trust {
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+}
+
+.hero-trust-icon {
+    width: 30px;
+    height: 30px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #eaf9ef;
+
+    color: #22a35a;
+
+    font-size: 13px;
+
+    font-weight: 800;
+}
+
+.hero-trust div:last-child {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+.hero-trust strong {
+    color: #273142;
+
+    font-size: 11px;
+}
+
+.hero-trust small {
+    color: #9aa3b1;
+
+    font-size: 9px;
+}
+
+
+/* =====================================
+   HERO IMAGE
+===================================== */
 
 .hero-image {
-    flex: 1;
+    position: relative;
+
+    height: 390px;
+
     display: flex;
+
+    align-items: center;
+
     justify-content: center;
 }
 
+
+/* Background decoration */
+
+.hero-image-bg {
+    position: absolute;
+
+    width: 340px;
+    height: 340px;
+
+    border-radius: 50%;
+
+    background: #f0eaff;
+}
+
+
+/* Image */
+
 .hero-image img {
-    width: 450px;
-    border-radius: 10px;
+    position: relative;
+
+    z-index: 2;
+
+    width: 100%;
+
+    max-width: 450px;
+
+    height: 350px;
+
+    object-fit: cover;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 18px 35px rgba(0, 0, 0, 0.12);
+}
+
+
+/* =====================================
+   OFFER CARD
+===================================== */
+
+.hero-offer {
+    position: absolute;
+
+    z-index: 3;
+
+    right: 0;
+
+    bottom: 28px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 12px 15px;
+
+    border: 1px solid #e8ebef;
+
+    border-radius: 11px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.10);
+}
+
+
+/* Offer icon */
+
+.offer-icon {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #fff0e6;
+
+    color: #f26b21;
+
+    font-size: 15px;
+
+    font-weight: 800;
+}
+
+
+/* Offer text */
+
+.hero-offer div {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+.hero-offer strong {
+    color: #273142;
+
+    font-size: 11px;
+}
+
+.hero-offer small {
+    color: #9aa3b1;
+
+    font-size: 9px;
+}
+
+
+/* =====================================
+   RESPONSIVE
+===================================== */
+
+@media (max-width: 1000px) {
+
+    .hero {
+        padding: 35px 25px 45px;
+    }
+
+    .hero-container {
+        grid-template-columns: 1fr 1fr;
+
+        gap: 35px;
+
+        padding: 35px;
+    }
+
+    .hero-text h1 {
+        font-size: 40px;
+    }
+
+    .hero-image {
+        height: 330px;
+    }
+
+    .hero-image img {
+        height: 300px;
+    }
+
+    .hero-image-bg {
+        width: 270px;
+        height: 270px;
+    }
+}
+
+
+@media (max-width: 750px) {
+
+    .hero {
+        padding: 25px 16px 35px;
+    }
+
+    .hero-container {
+        grid-template-columns: 1fr;
+
+        gap: 35px;
+
+        padding: 35px 25px;
+
+        text-align: center;
+    }
+
+    .hero-text {
+        max-width: 100%;
+    }
+
+    .hero-text h1 {
+        font-size: 38px;
+    }
+
+    .hero-text h1 span {
+        display: inline;
+    }
+
+    .hero-text p {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .hero-actions {
+        justify-content: center;
+
+        flex-wrap: wrap;
+    }
+
+    .hero-image {
+        height: 300px;
+    }
+
+    .hero-image img {
+        height: 270px;
+    }
+
+    .hero-offer {
+        right: 5%;
+
+        bottom: 10px;
+    }
+}
+
+
+@media (max-width: 480px) {
+
+    .hero-container {
+        padding: 30px 18px;
+    }
+
+    .hero-text h1 {
+        font-size: 32px;
+    }
+
+    .hero-text p {
+        font-size: 13px;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+
+        gap: 18px;
+    }
+
+    .hero-btn {
+        width: 100%;
+
+        justify-content: center;
+    }
+
+    .hero-image {
+        height: 250px;
+    }
+
+    .hero-image img {
+        height: 220px;
+
+        border-radius: 13px;
+    }
+
+    .hero-image-bg {
+        width: 210px;
+        height: 210px;
+    }
+
+    .hero-offer {
+        right: 0;
+
+        padding: 9px 11px;
+    }
 }

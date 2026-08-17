@@ -1,0 +1,371 @@
+/* =====================================
+   SELLER SIDEBAR
+===================================== */
+
+.seller-sidebar {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 245px;
+    height: 100vh;
+
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+
+    background: #ffffff;
+
+    border-right: 1px solid #e5e7eb;
+
+    padding: 28px 16px 18px;
+
+    z-index: 1000;
+}
+
+
+/* =====================================
+   PROFILE
+===================================== */
+
+.seller-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding: 4px 10px 28px;
+
+    border-bottom: 1px solid #edf0f4;
+
+    text-align: center;
+}
+
+
+/* Avatar */
+
+.seller-avatar {
+    width: 68px;
+    height: 68px;
+
+    padding: 3px;
+
+    border-radius: 50%;
+
+    background: #f0eaff;
+
+    margin-bottom: 12px;
+}
+
+.seller-avatar img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+}
+
+
+/* Name */
+
+.seller-profile h2 {
+    margin: 0;
+
+    color: #172033;
+
+    font-family: Georgia, "Times New Roman", serif;
+
+    font-size: 18px;
+    font-weight: 700;
+}
+
+
+/* Description */
+
+.seller-profile p {
+    margin: 5px 0 0;
+
+    color: #8a94a6;
+
+    font-size: 12px;
+}
+
+
+/* =====================================
+   MENU
+===================================== */
+
+.seller-menu {
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+
+    margin-top: 24px;
+}
+
+
+/* =====================================
+   MENU ITEM
+===================================== */
+
+.seller-menu-item {
+    width: 100%;
+    height: 44px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 0 13px;
+
+    border: none;
+    border-radius: 9px;
+
+    background: transparent;
+
+    color: #667085;
+
+    font-family: inherit;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+/* Icon */
+
+.menu-icon {
+    width: 27px;
+    height: 27px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 7px;
+
+    background: #f5f3ff;
+
+    color: #7c3aed;
+
+    font-size: 15px;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+
+/* =====================================
+   HOVER
+===================================== */
+
+.seller-menu-item:hover {
+    background: #f7f5ff;
+
+    color: #6d28d9;
+}
+
+.seller-menu-item:hover .menu-icon {
+    background: #ede9fe;
+
+    color: #6d28d9;
+}
+
+
+/* =====================================
+   ACTIVE
+===================================== */
+
+.seller-menu-item.active {
+    background: #fff0e6;
+
+    color: #f26b21;
+}
+
+.seller-menu-item.active .menu-icon {
+    background: #ffffff;
+
+    color: #f26b21;
+}
+
+
+/* =====================================
+   DIVIDER
+===================================== */
+
+.seller-menu-divider {
+    height: 1px;
+
+    margin: 12px 8px;
+
+    background: #edf0f4;
+}
+
+
+/* =====================================
+   LOGOUT
+===================================== */
+
+.logout-btn {
+    margin-top: 2px;
+
+    color: #7a8495;
+
+    text-align: left;
+}
+
+.logout-btn .menu-icon {
+    background: #fff2f2;
+
+    color: #d14343;
+}
+
+.logout-btn:hover {
+    background: #fff5f5;
+
+    color: #d14343;
+}
+
+.logout-btn:hover .menu-icon {
+    background: #ffe8e8;
+
+    color: #d14343;
+}
+
+
+/* =====================================
+   SIDEBAR FOOTER
+===================================== */
+
+.seller-sidebar-footer {
+    margin-top: auto;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 12px 10px;
+
+    color: #a0a8b5;
+
+    font-size: 11px;
+
+    border-top: 1px solid #edf0f4;
+}
+
+.footer-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #22c55e;
+}
+
+
+/* =====================================
+   MAIN CONTENT OFFSET
+===================================== */
+
+/*
+   Because the sidebar is fixed,
+   the main content needs to leave
+   space for it.
+*/
+
+.seller-main-content {
+    margin-left: 245px;
+
+    min-height: 100vh;
+
+    box-sizing: border-box;
+
+    background: #f7f8fc;
+}
+
+
+/* =====================================
+   RESPONSIVE
+===================================== */
+
+@media (max-width: 900px) {
+
+    .seller-sidebar {
+        width: 220px;
+    }
+
+    .seller-main-content {
+        margin-left: 220px;
+    }
+}
+
+
+@media (max-width: 700px) {
+
+    .seller-sidebar {
+        width: 70px;
+
+        padding: 20px 10px;
+    }
+
+    .seller-profile h2,
+    .seller-profile p,
+    .seller-menu-item span:not(.menu-icon),
+    .seller-sidebar-footer span:not(.footer-dot) {
+        display: none;
+    }
+
+    .seller-profile {
+        padding-bottom: 20px;
+    }
+
+    .seller-avatar {
+        width: 45px;
+        height: 45px;
+    }
+
+    .seller-menu {
+        margin-top: 20px;
+    }
+
+    .seller-menu-item {
+        justify-content: center;
+
+        padding: 0;
+    }
+
+    .menu-icon {
+        width: 34px;
+        height: 34px;
+    }
+
+    .seller-main-content {
+        margin-left: 70px;
+    }
+
+    .seller-sidebar-footer {
+        justify-content: center;
+        padding: 12px 0;
+    }
+}

@@ -8,6 +8,7 @@ function ProductDetails() {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [notice, setNotice] = useState("");
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -34,6 +35,23 @@ function ProductDetails() {
 
         fetchProduct();
     }, [id]);
+
+    const handleAddToCart = () => {
+        const token = localStorage.getItem("token");
+        const user = JSON.parse(localStorage.getItem("user") || "null");
+
+        if (!token) {
+            setNotice("Please login first.");
+            return;
+        }
+
+        if (user?.role === "seller") {
+            setNotice("Seller accounts cannot add products to cart. Please use a customer account.");
+            return;
+        }
+
+        setNotice("Please use the product cards on the home page to add items to cart.");
+    };
 
     if (loading) {
         return <h2>Loading Product...</h2>;
@@ -88,9 +106,16 @@ function ProductDetails() {
                     <button
                         className="add-cart-btn"
                         disabled={product.stock === 0}
+                        onClick={handleAddToCart}
                     >
                         Add to Cart
                     </button>
+
+                    {notice && (
+                        <p style={{ marginTop: "10px", color: "#b45309", fontSize: "14px" }}>
+                            {notice}
+                        </p>
+                    )}
 
                 </div>
 

@@ -5,7 +5,7 @@ import Products from "../../../productSection/products";
 import Categories from "../../categorySection/categories";
 import FlashSale from "../../../flashSale/FlashSale";
 import PromotionalBanner from "../../promotionalBanner/PromoBanner";
-import Footer from "../../Footer/footer";
+import Footer from"../../../../src/Footer/footer";
 
 function Home() {
   return (

@@ -1,98 +1,194 @@
 import "./FlashSaleCard.css";
 import { FaShoppingCart } from "react-icons/fa";
-import { useCart } from "../../src/cartContext/CartContext";
+import { useState } from "react";
+import { useCart } from "../../src/cartContext/UseCart";
 
 function FlashSaleCard({ product }) {
 
-  const { refreshCart } = useCart();
+    const { refreshCart } = useCart();
 
-  const handleAddToCart = async () => {
+    const [notice, setNotice] = useState("");
 
-    const user = JSON.parse(localStorage.getItem("user"));
 
-    if (!user) {
-      alert("Please login first.");
-      return;
-    }
+    // ==========================================
+    // ADD TO CART
+    // ==========================================
 
-    try {
+    const handleAddToCart = async () => {
 
-      const response = await fetch(
-        "http://127.0.0.1:8000/cart",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user_id: user.id,
-            product_id: product.id,
-            quantity: 1,
-          }),
+        const token = localStorage.getItem("token");
+
+        const user = JSON.parse(
+            localStorage.getItem("user") || "null"
+        );
+
+
+        // Login check
+
+        if (!token || !user) {
+            setNotice("Please login first.");
+            return;
         }
-      );
 
-      const data = await response.json();
 
-      if (response.ok) {
+        // Seller check
 
-        refreshCart();
+        if (user.role === "seller") {
 
-        alert("Product added to cart.");
+            setNotice(
+                "Seller accounts cannot add products to cart."
+            );
 
-      } else {
+            return;
+        }
 
-        alert(data.detail || "Unable to add product.");
 
-      }
+        try {
 
-    } catch (error) {
+            const response = await fetch(
+                "http://127.0.0.1:8000/cart",
+                {
+                    method: "POST",
 
-      console.error(error);
-      alert("Unable to connect to server.");
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
 
-    }
+                    body: JSON.stringify({
+                        product_id: product.id,
+                        quantity: 1,
+                    }),
+                }
+            );
 
-  };
 
-  return (
+            const data = await response.json();
 
-    <div className="flash-card">
 
-      <div className="sale-badge">
-        -{product.discount}%
-      </div>
+            if (response.ok) {
 
-      <img
-        src={product.image}
-        alt={product.name}
-      />
+                refreshCart();
 
-      <h3>{product.name}</h3>
+                setNotice(
+                    "Product added to cart."
+                );
 
-      <div className="price">
+            } else {
 
-        <span className="new-price">
-          ${product.price}
-        </span>
+                setNotice(
+                    data.detail ||
+                    "Unable to add product."
+                );
+            }
 
-        <span className="old-price">
-          ${product.oldPrice}
-        </span>
 
-      </div>
+        } catch (error) {
 
-      <button onClick={handleAddToCart}>
+            console.error(
+                "Add to cart error:",
+                error
+            );
 
-        <FaShoppingCart />
+            setNotice(
+                "Unable to connect to server."
+            );
+        }
+    };
 
-        Add to Cart
 
-      </button>
+    return (
 
-    </div>
+        <article className="flash-card">
 
-  );
+
+            {/* ==================================
+                SALE BADGE
+            ================================== */}
+
+            <div className="sale-badge">
+                -{product.discount}%
+            </div>
+
+
+            {/* ==================================
+                IMAGE
+            ================================== */}
+
+            <div className="flash-card-image">
+
+                <img
+                    src={product.image}
+                    alt={product.name}
+                />
+
+            </div>
+
+
+            {/* ==================================
+                DETAILS
+            ================================== */}
+
+            <div className="flash-card-details">
+
+                <span className="flash-card-label">
+                    FLASH DEAL
+                </span>
+
+
+                <h3>
+                    {product.name}
+                </h3>
+
+
+                {/* PRICE */}
+
+                <div className="price">
+
+                    <span className="new-price">
+                        ${Number(product.price).toFixed(2)}
+                    </span>
+
+                    <span className="old-price">
+                        ${Number(product.oldPrice).toFixed(2)}
+                    </span>
+
+                </div>
+
+
+                {/* ADD TO CART */}
+
+                <button
+                    type="button"
+                    onClick={handleAddToCart}
+                >
+
+                    <FaShoppingCart />
+
+                    <span>
+                        Add to Cart
+                    </span>
+
+                </button>
+
+
+                {/* NOTICE */}
+
+                {notice && (
+
+                    <p
+                        className="flash-cart-notice"
+                        role="status"
+                    >
+                        {notice}
+                    </p>
+
+                )}
+
+            </div>
+
+        </article>
+    );
 }
 
 export default FlashSaleCard;

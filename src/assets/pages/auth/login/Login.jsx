@@ -18,41 +18,69 @@ function Login() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
 
-    try {
-      const response = await fetch("http://127.0.0.1:8000/login", {
+  e.preventDefault();
+
+  try {
+
+    const response = await fetch(
+      "http://127.0.0.1:8000/login",
+      {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json",
         },
+
         body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert(data.message);
-
-        // Save logged in user (optional but recommended)
-        localStorage.setItem("user", JSON.stringify(data.user));
-
-        if (data.user.role === "customer") {
-          navigate("/customer-dashboard");
-        } else if (data.user.role === "seller") {
-          navigate("/seller-dashboard");
-        } else if (data.user.role === "admin") {
-          navigate("/admin-dashboard");
-        }
-      } else {
-        alert(data.detail);
       }
-    } catch (error) {
-      console.error(error);
-      alert("Unable to connect to the server.");
-    }
-  };
+    );
 
+    const data = await response.json();
+
+    console.log(data);
+
+    if (response.ok) {
+
+      // Save JWT Token
+      localStorage.setItem(
+        "token",
+        data.access_token
+      );
+
+      // Save User
+      localStorage.setItem(
+        "user",
+        JSON.stringify(data.user)
+      );
+
+      alert(data.message);
+
+      if (data.user.role === "customer") {
+
+        navigate("/customer-dashboard");
+
+      } else if (data.user.role === "seller") {
+
+        navigate("/seller-dashboard");
+
+      }
+
+    } else {
+
+      alert(data.detail);
+
+    }
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert("Unable to connect to the server.");
+
+  }
+
+};
   return (
     <div className="login-page">
       <div className="login-card">

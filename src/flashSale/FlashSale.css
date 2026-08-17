@@ -1,56 +1,295 @@
-.flash-sale{
-    background:#fff;
-    padding:70px 0;
+/* =====================================
+   FLASH SALE SECTION
+===================================== */
+
+.flash-sale {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 65px 40px 70px;
+
+    background: #f7f8fc;
 }
 
-.flash-sale .flash-container{
-    max-width:1200px;
-    margin:auto;
-    padding:0 20px;
+
+/* =====================================
+   CONTAINER
+===================================== */
+
+.flash-container {
+    max-width: 1250px;
+
+    margin: 0 auto;
 }
 
-.flash-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
+
+/* =====================================
+   HEADER
+===================================== */
+
+.flash-header {
+    display: flex;
+
+    align-items: flex-end;
+
+    justify-content: space-between;
+
+    gap: 25px;
+
+    margin-bottom: 22px;
 }
 
-.flash-header h2{
-    color:#f85606;
+
+/* =====================================
+   HEADING
+===================================== */
+
+.flash-heading {
+    text-align: left;
 }
 
-.shop-btn{
-    background:#f85606;
-    color:white;
-    border:none;
-    padding:10px 20px;
-    border-radius:5px;
-    cursor:pointer;
+
+.flash-label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #7c3aed;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
 }
 
-.countdown{
-    display:flex;
-    align-items:center;
-    gap:15px;
-    margin-bottom:30px;
+
+.flash-heading h2 {
+    margin: 0;
+
+    color: #172033;
+
+    font-family: Georgia, "Times New Roman", serif;
+
+    font-size: 32px;
+
+    font-weight: 700;
+
+    letter-spacing: -0.5px;
 }
 
-.timer{
-    display:flex;
-    gap:10px;
+
+.flash-heading p {
+    margin: 8px 0 0;
+
+    color: #7a8495;
+
+    font-size: 13px;
+
+    line-height: 1.6;
 }
 
-.timer span{
-    background:#f85606;
-    color:white;
-    padding:8px 12px;
-    border-radius:5px;
-    font-weight:bold;
+
+/* =====================================
+   SHOP ALL BUTTON
+===================================== */
+
+.shop-btn {
+    height: 40px;
+
+    padding: 0 18px;
+
+    border: 1px solid #7c3aed;
+
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: #7c3aed;
+
+    font-family: inherit;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
 }
 
-.flash-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:25px;
+
+.shop-btn:hover {
+    background: #7c3aed;
+
+    color: #ffffff;
+
+    transform: translateY(-1px);
+}
+
+
+/* =====================================
+   COUNTDOWN
+===================================== */
+
+.countdown {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 14px;
+
+    margin-bottom: 30px;
+
+    padding: 14px 20px;
+
+    border: 1px solid #e5ddff;
+
+    border-radius: 10px;
+
+    background: #f5f3ff;
+}
+
+
+.countdown-label {
+    color: #6b7280;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.8px;
+}
+
+
+/* =====================================
+   TIMER
+===================================== */
+
+.timer {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+}
+
+
+.timer span {
+    min-width: 38px;
+
+    height: 34px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 7px;
+
+    background: #7c3aed;
+
+    color: #ffffff;
+
+    font-size: 13px;
+
+    font-weight: 800;
+}
+
+
+.timer b {
+    color: #7c3aed;
+
+    font-size: 14px;
+}
+
+
+/* =====================================
+   FLASH GRID
+===================================== */
+
+.flash-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 20px;
+}
+
+
+/* =====================================
+   RESPONSIVE
+===================================== */
+
+@media (max-width: 1100px) {
+
+    .flash-sale {
+        padding: 55px 25px 65px;
+    }
+
+    .flash-grid {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+}
+
+
+@media (max-width: 800px) {
+
+    .flash-sale {
+        padding: 50px 20px 60px;
+    }
+
+    .flash-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .flash-heading h2 {
+        font-size: 28px;
+    }
+
+    .flash-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 16px;
+    }
+
+    .shop-btn {
+        width: 100%;
+    }
+}
+
+
+@media (max-width: 520px) {
+
+    .flash-sale {
+        padding: 45px 16px 55px;
+    }
+
+    .flash-heading h2 {
+        font-size: 25px;
+    }
+
+    .flash-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .countdown {
+        flex-direction: column;
+
+        gap: 9px;
+    }
 }

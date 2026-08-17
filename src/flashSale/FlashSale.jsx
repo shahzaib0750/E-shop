@@ -3,126 +3,197 @@ import { useEffect, useState } from "react";
 import FlashSaleCard from "./FlashSaleCard";
 
 const flashProducts = [
-  {
-    id: 1,
-    name: "Gaming Mouse",
-    price: 35,
-    oldPrice: 50,
-    discount: 30,
-    image: "/images/hero.jpg",
-  },
-  {
-    id: 2,
-    name: "Mechanical Keyboard",
-    price: 80,
-    oldPrice: 110,
-    discount: 27,
-    image: "/images/hero.jpg",
-  },
-  {
-    id: 3,
-    name: "Headphones",
-    price: 45,
-    oldPrice: 65,
-    discount: 31,
-    image: "/images/hero.jpg",
-  },
-  {
-    id: 4,
-    name: "Monitor",
-    price: 220,
-    oldPrice: 280,
-    discount: 22,
-    image: "/images/hero.jpg",
-  },
+    {
+        id: 1,
+        name: "Gaming Mouse",
+        price: 35,
+        oldPrice: 50,
+        discount: 30,
+        image: "/images/hero.jpg",
+    },
+    {
+        id: 2,
+        name: "Mechanical Keyboard",
+        price: 80,
+        oldPrice: 110,
+        discount: 27,
+        image: "/images/hero.jpg",
+    },
+    {
+        id: 3,
+        name: "Headphones",
+        price: 45,
+        oldPrice: 65,
+        discount: 31,
+        image: "/images/hero.jpg",
+    },
+    {
+        id: 4,
+        name: "Monitor",
+        price: 220,
+        oldPrice: 280,
+        discount: 22,
+        image: "/images/hero.jpg",
+    },
 ];
 
 function FlashSale() {
 
-  // Flash Sale ends in 2 hours
-  const [timeLeft, setTimeLeft] = useState(2 * 60 * 60);
+    // ==========================================
+    // COUNTDOWN
+    // ==========================================
 
-  useEffect(() => {
+    const [timeLeft, setTimeLeft] = useState(
+        2 * 60 * 60
+    );
 
-    const timer = setInterval(() => {
 
-      setTimeLeft((prev) => {
+    useEffect(() => {
 
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
+        const timer = setInterval(() => {
 
-        return prev - 1;
+            setTimeLeft((previousTime) => {
 
-      });
+                if (previousTime <= 1) {
 
-    }, 1000);
+                    clearInterval(timer);
 
-    return () => clearInterval(timer);
+                    return 0;
+                }
 
-  }, []);
-console.log(timeLeft);
-  const hours = String(Math.floor(timeLeft / 3600)).padStart(2, "0");
+                return previousTime - 1;
+            });
 
-  const minutes = String(
-    Math.floor((timeLeft % 3600) / 60)
-  ).padStart(2, "0");
+        }, 1000);
 
-  const seconds = String(
-    timeLeft % 60
-  ).padStart(2, "0");
 
-  return (
+        return () => {
+            clearInterval(timer);
+        };
 
-    <section className="flash-sale">
+    }, []);
 
-      <div className="flash-container">
 
-        <div className="flash-header">
+    // ==========================================
+    // FORMAT TIME
+    // ==========================================
 
-          <h2>🔥 Flash Sale</h2>
+    const hours = String(
+        Math.floor(timeLeft / 3600)
+    ).padStart(2, "0");
 
-          <button className="shop-btn">
-            Shop All
-          </button>
 
-        </div>
+    const minutes = String(
+        Math.floor(
+            (timeLeft % 3600) / 60
+        )
+    ).padStart(2, "0");
 
-        <div className="countdown">
 
-          <span>Ending In:</span>
+    const seconds = String(
+        timeLeft % 60
+    ).padStart(2, "0");
 
-          <div className="timer">
 
-            <span>{hours}</span> :
+    // ==========================================
+    // UI
+    // ==========================================
 
-            <span>{minutes}</span> :
+    return (
 
-            <span>{seconds}</span>
+        <section className="flash-sale">
 
-          </div>
+            <div className="flash-container">
 
-        </div>
 
-        <div className="flash-grid">
+                {/* ==================================
+                    HEADER
+                ================================== */}
 
-          {flashProducts.map((product) => (
+                <div className="flash-header">
 
-            <FlashSaleCard
-              key={product.id}
-              product={product}
-            />
+                    <div className="flash-heading">
 
-          ))}
+                        <span className="flash-label">
+                            LIMITED TIME OFFER
+                        </span>
 
-        </div>
+                        <h2>
+                            🔥 Flash Sale
+                        </h2>
 
-      </div>
+                        <p>
+                            Grab these deals before
+                            they're gone.
+                        </p>
 
-    </section>
+                    </div>
 
-  );
+
+                    <button
+                        type="button"
+                        className="shop-btn"
+                    >
+                        Shop All
+                    </button>
+
+                </div>
+
+
+                {/* ==================================
+                    COUNTDOWN
+                ================================== */}
+
+                <div className="countdown">
+
+                    <span className="countdown-label">
+                        Ending In
+                    </span>
+
+                    <div className="timer">
+
+                        <span>
+                            {hours}
+                        </span>
+
+                        <b>:</b>
+
+                        <span>
+                            {minutes}
+                        </span>
+
+                        <b>:</b>
+
+                        <span>
+                            {seconds}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                {/* ==================================
+                    PRODUCTS
+                ================================== */}
+
+                <div className="flash-grid">
+
+                    {flashProducts.map((product) => (
+
+                        <FlashSaleCard
+                            key={product.id}
+                            product={product}
+                        />
+
+                    ))}
+
+                </div>
+
+            </div>
+
+        </section>
+    );
 }
 
 export default FlashSale;

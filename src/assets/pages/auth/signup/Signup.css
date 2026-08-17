@@ -16,7 +16,14 @@
 
 .signup-card h1{
     text-align:center;
-    margin-bottom:25px;
+    margin-bottom:10px;
+}
+
+.signup-intro{
+    text-align:center;
+    margin:0 0 20px;
+    color:#666;
+    font-size:14px;
 }
 
 .input-group{
@@ -48,8 +55,27 @@
 
 .roles{
     display:flex;
-    gap:25px;
+    gap:12px;
     margin-top:10px;
+}
+
+.role-option{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 12px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    cursor:pointer;
+    flex:1;
+    justify-content:center;
+}
+
+.role-option.active{
+    border-color:#ff6600;
+    background:#fff7ed;
+    color:#c2410c;
+    font-weight:600;
 }
 
 .checkbox{

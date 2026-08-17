@@ -1,197 +1,713 @@
 import "./SellerDashboard.css";
-import Navbar from "../../components/navbar";
-import Footer from "../../Footer/footer";
-import { NavLink } from "react-router-dom";
-import { useEffect, useState } from "react";
+
+import {
+    useCallback,
+    useEffect,
+    useState
+} from "react";
+
+import { useNavigate } from "react-router-dom";
+
+import SellerSidebar from "./SellerSidebar";
 
 function SellerDashboard() {
-
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const fetchOrders = async () => {
-
-    try {
-
-      const user = JSON.parse(localStorage.getItem("user"));
-      console.log("Seller User:", user);
-
-      if (!user) {
-        alert("Please login first.");
-        return;
-      }
-
-      const response = await fetch(
-        `http://127.0.0.1:8000/seller/orders/${user.id}`
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setOrders(data);
-      } else {
-        alert(data.detail);
-      }
-
-    } catch (error) {
-
-      console.log(error);
-      alert("Unable to connect to server.");
-
-    } finally {
-
-      setLoading(false);
-
-    }
-
-  };
-
-  const totalRevenue = orders.reduce(
-    (sum, order) => sum + Number(order.total),
-    0
-  );
-
-  const pendingOrders = orders.filter(
-    order => order.status === "pending"
-  ).length;
-
-  return (
-    <>
-      <Navbar />
-
-      <div className="seller-dashboard">
-
-        <aside className="seller-sidebar">
-
-          <h2>E-Shop Seller</h2>
-
-          <ul>
-
-            <li><NavLink to="/seller-dashboard">Dashboard</NavLink></li>
-            <li><NavLink to="/seller/products">Products</NavLink></li>
-            <li><NavLink to="/seller/add-product">Add Product</NavLink></li>
-            <li><NavLink to="/seller/orders">Orders</NavLink></li>
-            <li><NavLink to="/seller/customers">Customers</NavLink></li>
-            <li><NavLink to="/seller/analytics">Analytics</NavLink></li>
-            <li><NavLink to="/seller/earnings">Earnings</NavLink></li>
-            <li><NavLink to="/seller/settings">Settings</NavLink></li>
-            <li><NavLink to="/">Logout</NavLink></li>
-
-          </ul>
-
-        </aside>
-
-        <main className="seller-content">
-
-          <h1>Seller Dashboard</h1>
-
-          <div className="seller-cards">
-
-            <div className="card">
-              <h2>{new Set(orders.map(o => o.product_id)).size}</h2>
-              <p>Total Products</p>
-            </div>
-
-            <div className="card">
-              <h2>{orders.length}</h2>
-              <p>Total Orders</p>
-            </div>
-
-            <div className="card">
-              <h2>${totalRevenue}</h2>
-              <p>Total Revenue</p>
-            </div>
-
-            <div className="card">
-              <h2>{pendingOrders}</h2>
-              <p>Pending Orders</p>
-            </div>
-
-          </div>
-
-          <div className="recent-orders">
-
-            <h2>Recent Orders</h2>
-
-            {loading ? (
-
-              <h3>Loading...</h3>
-
-            ) : orders.length === 0 ? (
-
-              <h3>No Orders Found</h3>
-
-            ) : (
-
-              <table>
-
-                <thead>
-
-                  <tr>
-
-                    <th>Order</th>
-                    <th>Customer</th>
-                    <th>Product</th>
-                    <th>Image</th>
-                    <th>Quantity</th>
-                    <th>Status</th>
-                    <th>Amount</th>
-
-                  </tr>
-
-                </thead>
-
-                <tbody>
-
-                  {orders.map((order) => (
-
-                    <tr key={`${order.order_id}-${order.product_id}`}>
-
-                      <td>#{order.order_id}</td>
-
-                      <td>{order.customer_id}</td>
-
-                      <td>{order.product_name}</td>
-
-                      <td>
-
-                        <img
-                          src={`/images/${order.image}`}
-                          alt={order.product_name}
-                          width="70"
-                        />
-
-                      </td>
-
-                      <td>{order.quantity}</td>
-
-                      <td>{order.status}</td>
-
-                      <td>${order.total}</td>
-
-                    </tr>
-
-                  ))}
-
-                </tbody>
-
-              </table>
-
-            )}
-
-          </div>
-
-        </main>
-
-      </div>
-
-      <Footer />
-    </>
-  );
+    const navigate = useNavigate();
+
+    const [orders, setOrders] = useState([]);
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchDashboardData = useCallback(async () => {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            navigate("/login");
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            const headers = {
+                Authorization: `Bearer ${token}`
+            };
+
+            const [
+                ordersResponse,
+                productsResponse
+            ] = await Promise.all([
+                fetch(
+                    "http://127.0.0.1:8000/seller/orders",
+                    {
+                        method: "GET",
+                        headers
+                    }
+                ),
+                fetch(
+                    "http://127.0.0.1:8000/seller/products",
+                    {
+                        method: "GET",
+                        headers
+                    }
+                )
+            ]);
+
+            const ordersData =
+                await ordersResponse.json();
+
+            const productsData =
+                await productsResponse.json();
+
+            if (
+                ordersResponse.status === 401 ||
+                productsResponse.status === 401
+            ) {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+
+                navigate("/login");
+                return;
+            }
+
+            if (
+                ordersResponse.status === 403 ||
+                productsResponse.status === 403
+            ) {
+                setOrders([]);
+                setProducts([]);
+                return;
+            }
+
+            if (!ordersResponse.ok) {
+                throw new Error(
+                    ordersData.detail ||
+                    "Unable to load orders."
+                );
+            }
+
+            if (!productsResponse.ok) {
+                throw new Error(
+                    productsData.detail ||
+                    "Unable to load products."
+                );
+            }
+
+            setOrders(
+                Array.isArray(ordersData)
+                    ? ordersData
+                    : []
+            );
+
+            setProducts(
+                Array.isArray(productsData)
+                    ? productsData
+                    : []
+            );
+        } catch (error) {
+            console.error(
+                "Dashboard error:",
+                error
+            );
+
+            setOrders([]);
+            setProducts([]);
+        } finally {
+            setLoading(false);
+        }
+    }, [navigate]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchDashboardData();
+        }, 0);
+
+        return () => clearTimeout(timer);
+    }, [fetchDashboardData]);
+
+    const totalRevenue = orders.reduce(
+        (sum, order) =>
+            sum + Number(order.total || 0),
+        0
+    );
+
+    const pendingOrders = orders.filter(
+        (order) =>
+            String(order.status || "")
+                .toLowerCase() === "pending"
+    ).length;
+
+    const completedOrders = orders.filter(
+        (order) =>
+            String(order.status || "")
+                .toLowerCase() === "completed"
+    ).length;
+
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat("en-PK", {
+            style: "currency",
+            currency: "PKR",
+            maximumFractionDigits: 0
+        }).format(amount);
+    };
+
+    const getStatusClass = (status) => {
+        const value = String(status || "")
+            .toLowerCase();
+
+        if (value === "completed") {
+            return "status-completed";
+        }
+
+        if (value === "pending") {
+            return "status-pending";
+        }
+
+        if (value === "processing") {
+            return "status-processing";
+        }
+
+        if (value === "cancelled") {
+            return "status-cancelled";
+        }
+
+        if (value === "shipped") {
+            return "status-shipped";
+        }
+
+        return "status-default";
+    };
+
+    const getImageUrl = (image) => {
+        if (!image) {
+            return "/images/placeholder.png";
+        }
+
+        if (
+            image.startsWith("http://") ||
+            image.startsWith("https://")
+        ) {
+            return image;
+        }
+
+        return `/images/${image}`;
+    };
+
+    const recentOrders = orders.slice(0, 8);
+
+    return (
+        <div className="seller-layout">
+            <SellerSidebar />
+
+            <main className="seller-main-content">
+                <div className="seller-dashboard">
+                    <header className="dashboard-header">
+                        <div>
+                            <span className="dashboard-eyebrow">
+                                SELLER CENTER
+                            </span>
+
+                            <h1>
+                                Dashboard
+                            </h1>
+
+                            <p>
+                                Manage your store,
+                                products and orders
+                                from one place.
+                            </p>
+                        </div>
+
+                        <div className="dashboard-header-actions">
+                            <button
+                                type="button"
+                                className="store-button"
+                                onClick={() =>
+                                    navigate("/")
+                                }
+                            >
+                                <span>↗</span>
+                                View Store
+                            </button>
+
+                            <button
+                                type="button"
+                                className="add-product-button"
+                                onClick={() =>
+                                    navigate(
+                                        "/seller/add-product"
+                                    )
+                                }
+                            >
+                                <span>+</span>
+                                Add Product
+                            </button>
+                        </div>
+                    </header>
+
+                    {loading ? (
+                        <div className="dashboard-loading">
+                            <div className="loading-spinner"></div>
+
+                            <p>
+                                Loading your dashboard...
+                            </p>
+                        </div>
+                    ) : (
+                        <>
+                            <section className="stats-grid">
+                                <div className="stat-card revenue-card">
+                                    <div className="stat-card-top">
+                                        <div className="stat-icon revenue-icon">
+                                            ₨
+                                        </div>
+
+                                        <span className="stat-label">
+                                            Total Revenue
+                                        </span>
+                                    </div>
+
+                                    <div className="stat-value">
+                                        {formatCurrency(
+                                            totalRevenue
+                                        )}
+                                    </div>
+
+                                    <div className="stat-footer">
+                                        <span className="stat-footer-icon">
+                                            ↗
+                                        </span>
+
+                                        From all orders
+                                    </div>
+                                </div>
+
+                                <div className="stat-card">
+                                    <div className="stat-card-top">
+                                        <div className="stat-icon orders-icon">
+                                            🛒
+                                        </div>
+
+                                        <span className="stat-label">
+                                            Total Orders
+                                        </span>
+                                    </div>
+
+                                    <div className="stat-value">
+                                        {orders.length}
+                                    </div>
+
+                                    <div className="stat-footer">
+                                        <span className="stat-footer-icon">
+                                            ✓
+                                        </span>
+
+                                        All orders received
+                                    </div>
+                                </div>
+
+                                <div className="stat-card">
+                                    <div className="stat-card-top">
+                                        <div className="stat-icon products-icon">
+                                            📦
+                                        </div>
+
+                                        <span className="stat-label">
+                                            Total Products
+                                        </span>
+                                    </div>
+
+                                    <div className="stat-value">
+                                        {products.length}
+                                    </div>
+
+                                    <div className="stat-footer">
+                                        <span className="stat-footer-icon">
+                                            +
+                                        </span>
+
+                                        Products in your store
+                                    </div>
+                                </div>
+
+                                <div className="stat-card">
+                                    <div className="stat-card-top">
+                                        <div className="stat-icon pending-icon">
+                                            ⏱
+                                        </div>
+
+                                        <span className="stat-label">
+                                            Pending Orders
+                                        </span>
+                                    </div>
+
+                                    <div className="stat-value">
+                                        {pendingOrders}
+                                    </div>
+
+                                    <div className="stat-footer">
+                                        <span className="stat-footer-icon">
+                                            !
+                                        </span>
+
+                                        Need your attention
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section className="dashboard-content-grid">
+                                <div className="orders-panel">
+                                    <div className="panel-header">
+                                        <div>
+                                            <h2>
+                                                Recent Orders
+                                            </h2>
+
+                                            <p>
+                                                Latest orders
+                                                from your
+                                                store
+                                            </p>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            className="view-all-button"
+                                            onClick={() =>
+                                                navigate(
+                                                    "/seller/orders"
+                                                )
+                                            }
+                                        >
+                                            View All →
+                                        </button>
+                                    </div>
+
+                                    {recentOrders.length ===
+                                    0 ? (
+                                        <div className="empty-orders">
+                                            <div className="empty-orders-icon">
+                                                🛍
+                                            </div>
+
+                                            <h3>
+                                                No orders
+                                                yet
+                                            </h3>
+
+                                            <p>
+                                                Orders will
+                                                appear here
+                                                when
+                                                customers
+                                                purchase
+                                                your
+                                                products.
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="orders-table-wrapper">
+                                            <table className="orders-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>
+                                                            ORDER
+                                                        </th>
+                                                        <th>
+                                                            PRODUCT
+                                                        </th>
+                                                        <th>
+                                                            CUSTOMER
+                                                        </th>
+                                                        <th>
+                                                            QTY
+                                                        </th>
+                                                        <th>
+                                                            AMOUNT
+                                                        </th>
+                                                        <th>
+                                                            STATUS
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody>
+                                                    {recentOrders.map(
+                                                        (
+                                                            order
+                                                        ) => (
+                                                            <tr
+                                                                key={`${order.order_id}-${order.product_id}`}
+                                                            >
+                                                                <td>
+                                                                    <span className="order-number">
+                                                                        #
+                                                                        {
+                                                                            order.order_id
+                                                                        }
+                                                                    </span>
+                                                                </td>
+
+                                                                <td>
+                                                                    <div className="product-cell">
+                                                                        <img
+                                                                            src={getImageUrl(
+                                                                                order.image
+                                                                            )}
+                                                                            alt={
+                                                                                order.product_name ||
+                                                                                "Product"
+                                                                            }
+                                                                            className="order-product-image"
+                                                                        />
+
+                                                                        <span>
+                                                                            {
+                                                                                order.product_name ||
+                                                                                "Unknown Product"
+                                                                            }
+                                                                        </span>
+                                                                    </div>
+                                                                </td>
+
+                                                                <td>
+                                                                    <span className="customer-id">
+                                                                        Customer
+                                                                        #
+                                                                        {
+                                                                            order.customer_id
+                                                                        }
+                                                                    </span>
+                                                                </td>
+
+                                                                <td>
+                                                                    <span className="quantity">
+                                                                        ×
+                                                                        {
+                                                                            order.quantity
+                                                                        }
+                                                                    </span>
+                                                                </td>
+
+                                                                <td>
+                                                                    <strong className="order-amount">
+                                                                        {formatCurrency(
+                                                                            Number(
+                                                                                order.total ||
+                                                                                0
+                                                                            )
+                                                                        )}
+                                                                    </strong>
+                                                                </td>
+
+                                                                <td>
+                                                                    <span
+                                                                        className={`order-status ${getStatusClass(
+                                                                            order.status
+                                                                        )}`}
+                                                                    >
+                                                                        <span className="status-dot"></span>
+
+                                                                        {String(
+                                                                            order.status ||
+                                                                            "Unknown"
+                                                                        )}
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        )
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <aside className="dashboard-side-panel">
+                                    <div className="quick-actions-card">
+                                        <div className="panel-header compact">
+                                            <div>
+                                                <h2>
+                                                    Quick
+                                                    Actions
+                                                </h2>
+
+                                                <p>
+                                                    Manage
+                                                    your
+                                                    store
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            className="quick-action"
+                                            onClick={() =>
+                                                navigate(
+                                                    "/seller/add-product"
+                                                )
+                                            }
+                                        >
+                                            <span className="quick-action-icon">
+                                                +
+                                            </span>
+
+                                            <span>
+                                                <strong>
+                                                    Add
+                                                    Product
+                                                </strong>
+
+                                                <small>
+                                                    Add a
+                                                    new
+                                                    item
+                                                </small>
+                                            </span>
+
+                                            <span className="quick-arrow">
+                                                →
+                                            </span>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className="quick-action"
+                                            onClick={() =>
+                                                navigate(
+                                                    "/seller/products"
+                                                )
+                                            }
+                                        >
+                                            <span className="quick-action-icon">
+                                                📦
+                                            </span>
+
+                                            <span>
+                                                <strong>
+                                                    Manage
+                                                    Products
+                                                </strong>
+
+                                                <small>
+                                                    View
+                                                    your
+                                                    catalog
+                                                </small>
+                                            </span>
+
+                                            <span className="quick-arrow">
+                                                →
+                                            </span>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className="quick-action"
+                                            onClick={() =>
+                                                navigate(
+                                                    "/seller/orders"
+                                                )
+                                            }
+                                        >
+                                            <span className="quick-action-icon">
+                                                🛒
+                                            </span>
+
+                                            <span>
+                                                <strong>
+                                                    Manage
+                                                    Orders
+                                                </strong>
+
+                                                <small>
+                                                    Process
+                                                    customer
+                                                    orders
+                                                </small>
+                                            </span>
+
+                                            <span className="quick-arrow">
+                                                →
+                                            </span>
+                                        </button>
+                                    </div>
+
+                                    <div className="store-overview-card">
+                                        <div className="store-overview-title">
+                                            <span className="overview-icon">
+                                                📊
+                                            </span>
+
+                                            <div>
+                                                <h3>
+                                                    Store
+                                                    Overview
+                                                </h3>
+
+                                                <p>
+                                                    Current
+                                                    performance
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="overview-row">
+                                            <span>
+                                                Products
+                                            </span>
+
+                                            <strong>
+                                                {
+                                                    products.length
+                                                }
+                                            </strong>
+                                        </div>
+
+                                        <div className="overview-row">
+                                            <span>
+                                                Orders
+                                            </span>
+
+                                            <strong>
+                                                {
+                                                    orders.length
+                                                }
+                                            </strong>
+                                        </div>
+
+                                        <div className="overview-row">
+                                            <span>
+                                                Completed
+                                            </span>
+
+                                            <strong className="completed-number">
+                                                {
+                                                    completedOrders
+                                                }
+                                            </strong>
+                                        </div>
+
+                                        <div className="overview-row">
+                                            <span>
+                                                Pending
+                                            </span>
+
+                                            <strong className="pending-number">
+                                                {
+                                                    pendingOrders
+                                                }
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </aside>
+                            </section>
+                        </>
+                    )}
+                </div>
+            </main>
+        </div>
+    );
 }
 
 export default SellerDashboard;

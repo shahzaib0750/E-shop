@@ -1,132 +1,189 @@
 import "../components/navbar.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+
 import {
-  FaSearch,
-  FaShoppingCart,
-  FaUser,
+    FaSearch,
+    FaShoppingCart,
+    FaUser,
 } from "react-icons/fa";
 
-import { useCart } from "../../../src/cartContext/CartContext";
+import { useCart } from "../../../src/cartContext/UseCart"
 
 function Navbar() {
 
-  const [search, setSearch] = useState("");
+    const [search, setSearch] = useState("");
 
-  const { cartCount } = useCart();
+    const { cartCount } = useCart();
 
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  const handleSearch = async () => {
 
-    if (!search.trim()) return;
+    // ==========================================
+    // SEARCH
+    // ==========================================
 
-    try {
+    const handleSearch = async () => {
 
-      const response = await fetch(
-        `http://127.0.0.1:8000/products/search?keyword=${search}`
-      );
+        if (!search.trim()) return;
 
-      const data = await response.json();
+        try {
 
-      if (response.ok) {
+            const response = await fetch(
+                `http://127.0.0.1:8000/products/search?keyword=${search}`
+            );
 
-        navigate("/search", {
-          state: {
-            products: data,
-            keyword: search,
-          },
-        });
+            const data = await response.json();
 
-      } else {
+            if (response.ok) {
 
-        alert(data.detail);
+                navigate("/search", {
+                    state: {
+                        products: data,
+                        keyword: search,
+                    },
+                });
 
-      }
+            } else {
 
-    } catch (error) {
+                alert(
+                    data.detail ||
+                    "Unable to search products."
+                );
 
-      console.error(error);
-      alert("Unable to connect to server.");
-
-    }
-
-  };
-
-  return (
-
-    <header className="navbar">
-
-      <div className="logo">
-        <Link to="/">E-Shop</Link>
-      </div>
-
-      <nav className="nav-links">
-
-        <Link to="/">Home</Link>
-
-        <Link to="/newarrivals">
-          New Arrivals
-        </Link>
-
-        <Link to="/customerreview">
-          Customer Review
-        </Link>
-
-        <Link to="/contact">
-          Contact
-        </Link>
-
-        <Link to="/cart">
-          Cart
-        </Link>
-
-      </nav>
-
-      <div className="search-box">
-
-        <input
-          type="text"
-          placeholder="Search products..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSearch();
             }
-          }}
-        />
 
-        <button onClick={handleSearch}>
-          <FaSearch />
-        </button>
+        } catch (error) {
 
-      </div>
+            console.error(error);
 
-      <div className="nav-icons">
+            alert(
+                "Unable to connect to server."
+            );
+        }
+    };
 
-        <Link to="/cart" className="cart-icon">
 
-          <FaShoppingCart className="icon" />
+    return (
 
-          {cartCount > 0 && (
-            <span className="cart-badge">
-              {cartCount}
-            </span>
-          )}
+        <header className="navbar">
 
-        </Link>
 
-        <Link to="/account">
-          <FaUser className="icon" />
-        </Link>
+            {/* ==================================
+                LOGO
+            ================================== */}
 
-      </div>
+            <div className="logo">
 
-    </header>
+                <Link to="/">
+                    E-Shop
+                </Link>
 
-  );
+            </div>
 
+
+            {/* ==================================
+                NAVIGATION
+            ================================== */}
+
+            <nav className="nav-links">
+
+                <Link to="/">
+                    Home
+                </Link>
+
+                <Link to="/newarrivals">
+                    New Arrivals
+                </Link>
+
+                <Link to="/customerreview">
+                    Customer Review
+                </Link>
+
+                <Link to="/contact">
+                    Contact
+                </Link>
+
+            </nav>
+
+
+            {/* ==================================
+                SEARCH
+            ================================== */}
+
+            <div className="search-box">
+
+                <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={search}
+                    onChange={(e) =>
+                        setSearch(e.target.value)
+                    }
+                    onKeyDown={(e) => {
+
+                        if (e.key === "Enter") {
+                            handleSearch();
+                        }
+
+                    }}
+                />
+
+                <button
+                    type="button"
+                    onClick={handleSearch}
+                    aria-label="Search"
+                >
+                    <FaSearch />
+                </button>
+
+            </div>
+
+
+            {/* ==================================
+                ACTIONS
+            ================================== */}
+
+            <div className="nav-icons">
+
+
+                {/* Cart */}
+
+                <Link
+                    to="/cart"
+                    className="nav-action cart-icon"
+                    aria-label="Shopping cart"
+                >
+
+                    <FaShoppingCart />
+
+                    {cartCount > 0 && (
+
+                        <span className="cart-badge">
+                            {cartCount}
+                        </span>
+
+                    )}
+
+                </Link>
+
+
+                {/* Account */}
+
+                <Link
+                    to="/account"
+                    className="nav-action"
+                    aria-label="Account"
+                >
+
+                    <FaUser />
+
+                </Link>
+
+            </div>
+
+        </header>
+    );
 }
 
 export default Navbar;

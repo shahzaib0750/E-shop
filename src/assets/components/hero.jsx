@@ -1,31 +1,111 @@
 import "./hero.css";
-// import "../"
+import { useNavigate } from "react-router-dom";
+
 function Hero() {
-  return (
-    <section className="hero">
-      <div className="hero-content">
+    const navigate = useNavigate();
 
-        <div className="hero-text">
-          <h1>Welcome to E-Shop Online Shopping Centre</h1>
+    const handleShopNow = () => {
+        navigate("/newarrivals");
+    };
 
-          <p>
-            Shop the latest products available here in
-            E-Shop at discounted prices every day.
-          </p>
+    return (
+        <section className="hero">
 
-          <button>Shop Now</button>
-        </div>
+            <div className="hero-container">
 
-        <div className="hero-image">
-          <img
-            src="/images/hero.jpg"
-            alt="Hero Product"
-          />
-        </div>
+                {/* =========================
+                    HERO TEXT
+                ========================= */}
 
-      </div>
-    </section>
-  );
+                <div className="hero-text">
+
+                    <span className="hero-label">
+                        WELCOME TO E-SHOP
+                    </span>
+
+                    <h1>
+                        Everything You Need,
+                        <span> All in One Place.</span>
+                    </h1>
+
+                    <p>
+                        Discover the latest products at great prices.
+                        Shop quality products, enjoy amazing deals,
+                        and get everything delivered to your door.
+                    </p>
+
+                    <div className="hero-actions">
+
+                        <button
+                            className="hero-btn"
+                            onClick={handleShopNow}
+                        >
+                            Shop Now
+                            <span>→</span>
+                        </button>
+
+                        <div className="hero-trust">
+
+                            <div className="hero-trust-icon">
+                                ✓
+                            </div>
+
+                            <div>
+                                <strong>
+                                    Quality Products
+                                </strong>
+
+                                <small>
+                                    Great prices every day
+                                </small>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                {/* =========================
+                    HERO IMAGE
+                ========================= */}
+
+                <div className="hero-image">
+
+                    <div className="hero-image-bg"></div>
+
+                    <img
+                        src="/images/hero.jpg"
+                        alt="E-Shop products"
+                    />
+
+                    {/* Floating offer */}
+
+                    <div className="hero-offer">
+
+                        <span className="offer-icon">
+                            %
+                        </span>
+
+                        <div>
+                            <strong>
+                                Great Deals
+                            </strong>
+
+                            <small>
+                                Every Day
+                            </small>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+    );
 }
 
 export default Hero;

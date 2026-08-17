@@ -1,137 +1,356 @@
 import "./productCard.css";
-import { FaShoppingCart, FaStar } from "react-icons/fa";
-import { useCart } from "../../src/cartContext/CartContext";
 
+import {
+    FaShoppingCart,
+    FaStar,
+    FaHeart,
+} from "react-icons/fa";
+
+import {
+    useEffect,
+    useState,
+} from "react";
+
+import { useCart } from "../../src/cartContext/UseCart";
+import { apiFetch } from "../api/api";
 
 function ProductCard({ product }) {
+    const { refreshCart } = useCart();
 
+    const [notice, setNotice] = useState("");
+    const [inWishlist, setInWishlist] = useState(false);
+    const [wishlistLoading, setWishlistLoading] =
+        useState(false);
 
-  const { refreshCart } = useCart();
+    // ==========================================
+    // CHECK WISHLIST
+    // ==========================================
 
+    useEffect(() => {
+        let cancelled = false;
 
-  const handleAddToCart = async () => {
+        const checkWishlist = async () => {
+            const token =
+                localStorage.getItem("token");
 
-    const user = JSON.parse(localStorage.getItem("user"));
+            const user = JSON.parse(
+                localStorage.getItem("user") ||
+                    "null"
+            );
 
-    if (!user) {
-      alert("Please login first.");
-      return;
-    }
+            if (
+                !token ||
+                user?.role === "seller"
+            ) {
+                if (!cancelled) {
+                    setInWishlist(false);
+                }
 
+                return;
+            }
 
-    try {
+            try {
+                const response = await apiFetch(
+                    `/wishlist/check/${product.id}`,
+                    {
+                        method: "GET",
+                    }
+                );
 
-      const response = await fetch(
-        "http://127.0.0.1:8000/cart",
-        {
-          method: "POST",
+                if (!response.ok) {
+                    if (!cancelled) {
+                        setInWishlist(false);
+                    }
 
-          headers: {
-            "Content-Type": "application/json",
-          },
+                    return;
+                }
 
-          body: JSON.stringify({
-            user_id: user.id,
-            product_id: product.id,
-            quantity: 1,
-          }),
+                const data =
+                    await response.json();
+
+                if (!cancelled) {
+                    setInWishlist(
+                        data.in_wishlist === true
+                    );
+                }
+            } catch (error) {
+                if (!cancelled) {
+                    console.error(
+                        "Wishlist check error:",
+                        error
+                    );
+                }
+            }
+        };
+
+        checkWishlist();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [product.id]);
+
+    // ==========================================
+    // ADD TO CART
+    // ==========================================
+
+    const handleAddToCart = async () => {
+        const token =
+            localStorage.getItem("token");
+
+        const user = JSON.parse(
+            localStorage.getItem("user") ||
+                "null"
+        );
+
+        if (!token) {
+            setNotice(
+                "Please login first."
+            );
+            return;
         }
-      );
 
+        if (user?.role === "seller") {
+            setNotice(
+                "Seller accounts cannot add products to cart."
+            );
+            return;
+        }
 
-      const data = await response.json();
+        try {
+            const response = await apiFetch(
+                "/cart",
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        product_id: product.id,
+                        quantity: 1,
+                    }),
+                }
+            );
 
+            const data =
+                await response.json();
 
-      if (response.ok) {
+            if (response.ok) {
+                await refreshCart();
 
+                setNotice(
+                    "Product added to cart."
+                );
+            } else {
+                setNotice(
+                    data.detail ||
+                        "Unable to add product."
+                );
+            }
+        } catch (error) {
+            console.error(
+                "Add to cart error:",
+                error
+            );
 
-        // Update Navbar cart badge
-        refreshCart();
+            setNotice(
+                "Unable to connect to server."
+            );
+        }
+    };
 
+    // ==========================================
+    // WISHLIST
+    // ==========================================
 
-        alert("Product added to cart.");
+    const handleWishlist = async () => {
+        const token =
+            localStorage.getItem("token");
 
+        const user = JSON.parse(
+            localStorage.getItem("user") ||
+                "null"
+        );
 
-      } else {
+        if (!token) {
+            setNotice(
+                "Please login first."
+            );
+            return;
+        }
 
-        alert(data.detail || "Unable to add product.");
+        if (user?.role === "seller") {
+            setNotice(
+                "Seller accounts cannot use wishlist."
+            );
+            return;
+        }
 
-      }
+        if (wishlistLoading) {
+            return;
+        }
 
+        setWishlistLoading(true);
 
-    } catch (error) {
+        try {
+            const response = await apiFetch(
+                `/wishlist/${product.id}`,
+                {
+                    method: inWishlist
+                        ? "DELETE"
+                        : "POST",
+                }
+            );
 
-      console.error(error);
-      alert("Unable to connect to server.");
+            const data =
+                await response.json();
 
-    }
+            if (response.status === 401) {
+                localStorage.removeItem(
+                    "token"
+                );
 
-  };
+                localStorage.removeItem(
+                    "user"
+                );
 
+                setNotice(
+                    "Your session has expired. Please login again."
+                );
 
-  return (
+                setInWishlist(false);
 
-    <div className="home-product-card">
+                return;
+            }
 
-      <div className="home-product-image">
+            if (response.ok) {
+                if (inWishlist) {
+                    setInWishlist(false);
 
-        <img
-          src={product.image}
-          alt={product.name}
-        />
+                    setNotice(
+                        "Product removed from wishlist."
+                    );
+                } else {
+                    setInWishlist(true);
 
-      </div>
+                    setNotice(
+                        "Product added to wishlist."
+                    );
+                }
+            } else {
+                setNotice(
+                    data.detail ||
+                        "Unable to update wishlist."
+                );
+            }
+        } catch (error) {
+            console.error(
+                "Wishlist error:",
+                error
+            );
 
+            setNotice(
+                "Unable to connect to server."
+            );
+        } finally {
+            setWishlistLoading(false);
+        }
+    };
 
-      <div className="home-product-details">
+    // ==========================================
+    // UI
+    // ==========================================
 
+    return (
+        <article className="home-product-card">
 
-        <h3 className="home-product-name">
-          {product.name}
-        </h3>
+            <div className="home-product-image">
 
+                <img
+                    src={product.image}
+                    alt={product.name}
+                />
 
-        <p className="home-product-category">
-          {product.category}
-        </p>
+                <button
+                    type="button"
+                    className={`wishlist-btn ${
+                        inWishlist
+                            ? "wishlist-active"
+                            : ""
+                    }`}
+                    onClick={handleWishlist}
+                    disabled={
+                        wishlistLoading
+                    }
+                    aria-label={
+                        inWishlist
+                            ? "Remove from wishlist"
+                            : "Add to wishlist"
+                    }
+                    title={
+                        inWishlist
+                            ? "Remove from wishlist"
+                            : "Add to wishlist"
+                    }
+                >
+                    <FaHeart />
+                </button>
 
+            </div>
 
-        <div className="home-product-price">
-          ${product.price}
-        </div>
+            <div className="home-product-details">
 
+                <span className="home-product-category">
+                    {product.category ||
+                        "Product"}
+                </span>
 
-        <div className="home-product-rating">
+                <h3 className="home-product-name">
+                    {product.name}
+                </h3>
 
-          <FaStar />
+                <div className="home-product-price">
+                    $
+                    {Number(
+                        product.price
+                    ).toFixed(2)}
+                </div>
 
-          <span>
-            {product.rating || "5.0"}
-          </span>
+                <div className="home-product-rating">
 
-        </div>
+                    <FaStar />
 
+                    <span>
+                        {product.rating ||
+                            "5.0"}
+                    </span>
 
-        <button
-          className="home-cart-btn"
-          onClick={handleAddToCart}
-        >
+                </div>
 
-          <FaShoppingCart />
+                <button
+                    type="button"
+                    className="home-cart-btn"
+                    onClick={
+                        handleAddToCart
+                    }
+                >
+                    <FaShoppingCart />
 
-          Add to Cart
+                    <span>
+                        Add to Cart
+                    </span>
+                </button>
 
-        </button>
+                {notice && (
+                    <p
+                        className="cart-notice"
+                        role="status"
+                    >
+                        {notice}
+                    </p>
+                )}
 
+            </div>
 
-      </div>
-
-
-    </div>
-
-  );
-
+        </article>
+    );
 }
-
 
 export default ProductCard;

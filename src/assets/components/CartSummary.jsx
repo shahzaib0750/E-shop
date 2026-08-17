@@ -1,44 +1,87 @@
 import { Link } from "react-router-dom";
 
+
 function CartSummary({ subtotal }) {
+    return (
+        <div className="cart-summary">
 
-  return (
+            <div className="cart-summary-header">
+                <p className="summary-label">
+                    CART
+                </p>
 
-    <div className="cart-summary">
+                <h2>
+                    Order Summary
+                </h2>
+            </div>
 
-      <h2>Order Summary</h2>
 
-      <div className="summary-row">
+            <div className="summary-details">
 
-        <span>Subtotal</span>
+                <div className="summary-row">
 
-        <span>${subtotal}</span>
+                    <span>
+                        Subtotal
+                    </span>
 
-      </div>
+                    <span>
+                        $ {Number(subtotal).toFixed(2)}
+                    </span>
 
-      <div className="summary-row">
+                </div>
 
-        <span>Shipping</span>
 
-        <span>Free</span>
+                <div className="summary-row">
 
-      </div>
+                    <span>
+                        Shipping
+                    </span>
 
-      <div className="summary-row total">
+                    <span className="free-shipping">
+                        Free
+                    </span>
 
-        <span>Total</span>
+                </div>
 
-        <span>${subtotal}</span>
+            </div>
 
-      </div>
 
-      <Link to="/checkout" className="checkout-btn">
-        Proceed to Checkout
-      </Link>
+            <div className="summary-divider"></div>
 
-    </div>
 
-  );
+            <div className="summary-row total">
+
+                <span>
+                    Total
+                </span>
+
+                <strong>
+                    $ {Number(subtotal).toFixed(2)}
+                </strong>
+
+            </div>
+
+
+            <Link
+                to="/checkout"
+                className="checkout-btn"
+            >
+                <span>
+                    Proceed to Checkout
+                </span>
+
+                <span className="checkout-arrow">
+                    →
+                </span>
+            </Link>
+
+
+            <p className="secure-checkout">
+                🔒 Secure checkout
+            </p>
+
+        </div>
+    );
 }
 
 export default CartSummary;

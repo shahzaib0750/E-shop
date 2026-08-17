@@ -22,6 +22,9 @@ import SearchResults from "../src/assets/pages/searchResults/SearchResults";
 import ChatBot from "../src/assets/components/chatbot/ChatBot";
 import { CartProvider } from "./cartContext/CartContext";
 import CategoryProducts from "../src/assets/pages/categoryProducts/CategoryProducts";
+// import MyOrders from "./assets/pages/customer/MyOrders";
+import OrderDetails from "./assets/pages/orderDetails/OrderDetails";
+import Wishlist from "./assets/pages/customer/Wishlist";
 
 
 
@@ -86,6 +89,11 @@ function App() {
     path="/category/:id"
     element={<CategoryProducts />}
 />
+<Route
+    path="/order/:id"
+    element={<OrderDetails />}
+/>
+<Route path="/wishlist" element={<Wishlist />} />
 
       </Routes>
       <ChatBot/>

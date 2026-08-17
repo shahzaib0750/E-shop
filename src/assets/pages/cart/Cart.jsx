@@ -6,221 +6,271 @@ import Footer from "../../Footer/footer";
 import CartItem from "../../components/CartItems";
 import CartSummary from "../../components/CartSummary";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { apiFetch } from "../../../api/api";
 
 function Cart() {
-
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const fetchCart = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(
+      localStorage.getItem("user") || "null"
+    );
 
-  // =========================
-  // GET CART
-  // =========================
-const fetchCart = async () => {
-
-  try {
-
-    const user = JSON.parse(localStorage.getItem("user"));
-
-    console.log("Logged in user:", user);
-
-    if (!user) {
+    if (!token) {
       setError("Please login to view your cart.");
       setLoading(false);
       return;
     }
 
-    console.log("Fetching cart for user:", user.id);
-
-    const response = await fetch(
-      `http://127.0.0.1:8000/cart/${user.id}`
-    );
-
-    const data = await response.json();
-
-    console.log("Cart API Response:", data);
-
-    if (!response.ok) {
-      setError(data.detail || "Unable to load cart.");
+    if (user?.role === "seller") {
+      setError(
+        "Seller accounts cannot access the customer cart."
+      );
+      setLoading(false);
       return;
     }
 
-    console.log("Setting cart items:", data);
+    try {
+      setLoading(true);
+      setError("");
 
-    setCartItems(data);
-    setError("");
+      const response = await apiFetch("/cart", {
+        method: "GET",
+      });
 
-  } catch (error) {
+      const data = await response.json();
 
-    console.error(error);
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        setError("Your session has expired. Please login again.");
+        return;
+      }
 
-  } finally {
+      if (!response.ok) {
+        setError(
+          data.detail || "Unable to load cart."
+        );
+        return;
+      }
 
-    setLoading(false);
-
-  }
-
-};
-
-
-  // =========================
-  // LOAD CART WHEN PAGE OPENS
-  // =========================
-
-  useEffect(() => {
-    // console.log("Fetching cart for user:", user.id);
-    fetchCart();
-
+      setCartItems(
+        Array.isArray(data) ? data : []
+      );
+    } catch (error) {
+      console.error("Cart Error:", error);
+      setError("Unable to connect to server.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
 
-  // =========================
-  // CALCULATE SUBTOTAL
-  // =========================
-
-  const subtotal = cartItems.reduce(
-    (total, item) => {
-
-      return (
-        total +
-        Number(item.price) *
-        Number(item.quantity)
+    const loadCart = async () => {
+      const token = localStorage.getItem("token");
+      const user = JSON.parse(
+        localStorage.getItem("user") || "null"
       );
 
-    },
+      if (!token) {
+        if (!cancelled) {
+          setError("Please login to view your cart.");
+          setLoading(false);
+        }
+        return;
+      }
+
+      if (user?.role === "seller") {
+        if (!cancelled) {
+          setError(
+            "Seller accounts cannot access the customer cart."
+          );
+          setLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const response = await apiFetch("/cart", {
+          method: "GET",
+        });
+
+        const data = await response.json();
+
+        if (cancelled) {
+          return;
+        }
+
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          setError(
+            "Your session has expired. Please login again."
+          );
+          setLoading(false);
+          return;
+        }
+
+        if (!response.ok) {
+          setError(
+            data.detail || "Unable to load cart."
+          );
+          setLoading(false);
+          return;
+        }
+
+        setCartItems(
+          Array.isArray(data) ? data : []
+        );
+        setError("");
+        setLoading(false);
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Cart Error:", error);
+          setError("Unable to connect to server.");
+          setLoading(false);
+        }
+      }
+    };
+
+    loadCart();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const subtotal = cartItems.reduce(
+    (total, item) =>
+      total +
+      Number(item.price || 0) *
+        Number(item.quantity || 0),
     0
   );
 
-
-  // =========================
-  // LOADING
-  // =========================
-
   if (loading) {
-
     return (
       <>
         <Navbar />
 
-        <section className="cart-page">
+        <main className="cart-page">
+          <div className="cart-wrapper">
+            <div className="cart-heading">
+              <span>Your Shopping Cart</span>
+              <h1>Shopping Cart</h1>
+            </div>
 
-          <div className="container">
-
-            <h1>Shopping Cart</h1>
-
-            <h3>Loading cart...</h3>
-
+            <div className="cart-loading">
+              <div className="loading-spinner"></div>
+              <p>Loading your cart...</p>
+            </div>
           </div>
-
-        </section>
+        </main>
 
         <Footer />
       </>
     );
-
   }
 
-
-  // =========================
-  // PAGE
-  // =========================
-console.log("cartItems state:", cartItems)
-console.log("cartItems length:", cartItems.length)
-
   return (
-
     <>
       <Navbar />
 
+      <main className="cart-page">
+        <div className="cart-wrapper">
+          <div className="cart-heading">
+            <span>Your Shopping Cart</span>
 
-      <section className="cart-page">
+            <h1>Shopping Cart</h1>
 
-        <div className="container">
-
-          <h1>Shopping Cart</h1>
-
-
-          {/* ERROR */}
+            {!error && cartItems.length > 0 && (
+              <p>
+                {cartItems.length}{" "}
+                {cartItems.length === 1
+                  ? "item"
+                  : "items"}{" "}
+                in your cart
+              </p>
+            )}
+          </div>
 
           {error && (
+            <div className="cart-message error">
+              <div className="message-icon">!</div>
 
-            <div className="cart-error">
-
-              <h3>{error}</h3>
-
+              <div>
+                <h3>Unable to load cart</h3>
+                <p>{error}</p>
+              </div>
             </div>
-
           )}
 
+          {!error && cartItems.length === 0 && (
+            <div className="cart-message empty">
+              <div className="empty-icon">🛒</div>
 
-          {/* EMPTY CART */}
+              <h2>Your cart is empty</h2>
 
-          {!error &&
-            cartItems.length === 0 && (
+              <p>
+                You haven't added any products yet.
+              </p>
 
-              <div className="empty-cart">
+              <a
+                href="/products"
+                className="continue-shopping"
+              >
+                Continue Shopping
+              </a>
+            </div>
+          )}
 
-                <h3>
-                  Your cart is empty.
-                </h3>
+          {!error && cartItems.length > 0 && (
+            <div className="cart-layout">
+              <section className="cart-items-section">
+                <div className="cart-section-header">
+                  <h2>Cart Items</h2>
 
-                <p>
-                  Add some products to your cart.
-                </p>
-
-              </div>
-
-            )}
-
-
-          {/* CART */}
-
-          {!error &&
-            cartItems.length > 0 && (
-
-              <div className="cart-container">
-
-
-                <div className="cart-items">
-
-                  {cartItems.map((item) => (
-
-                    <CartItem
-
-                      key={item.cart_id}
-
-                      item={item}
-
-                      onCartUpdate={fetchCart}
-
-                    />
-
-                  ))}
-
+                  <span>
+                    {cartItems.length}{" "}
+                    {cartItems.length === 1
+                      ? "item"
+                      : "items"}
+                  </span>
                 </div>
 
+                <div className="cart-items-list">
+                  {cartItems.map((item) => (
+                    <CartItem
+                      key={item.cart_id}
+                      item={item}
+                      onCartUpdate={fetchCart}
+                    />
+                  ))}
+                </div>
 
-                <CartSummary
-                  subtotal={subtotal}
-                />
+                <a
+                  href="/products"
+                  className="continue-shopping-link"
+                >
+                  ← Continue Shopping
+                </a>
+              </section>
 
-              </div>
-
-            )}
-
+              <aside className="cart-summary-section">
+                <CartSummary subtotal={subtotal} />
+              </aside>
+            </div>
+          )}
         </div>
-
-      </section>
-
+      </main>
 
       <Footer />
-
     </>
-
   );
-
 }
 
 export default Cart;

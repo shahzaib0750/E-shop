@@ -1,72 +1,299 @@
-.flash-card{
+/* =====================================
+   FLASH SALE CARD
+===================================== */
 
-    position:relative;
-    background:white;
-    border:1px solid #eee;
-    border-radius:10px;
-    padding:20px;
-    text-align:center;
-    transition:.3s;
+.flash-card {
+    position: relative;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    overflow: hidden;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.035);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
 }
 
-.flash-card:hover{
 
-    transform:translateY(-5px);
-    box-shadow:0 10px 20px rgba(0,0,0,.1);
+.flash-card:hover {
+    transform: translateY(-5px);
 
+    border-color: #ddd4ff;
+
+    box-shadow:
+        0 12px 28px rgba(0, 0, 0, 0.08);
 }
 
-.flash-card img{
 
-    width:170px;
-    height:170px;
-    object-fit:contain;
+/* =====================================
+   SALE BADGE
+===================================== */
 
+.sale-badge {
+    position: absolute;
+
+    top: 12px;
+    left: 12px;
+
+    z-index: 2;
+
+    padding: 6px 9px;
+
+    border-radius: 6px;
+
+    background: #f26b21;
+
+    color: #ffffff;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    box-shadow:
+        0 4px 10px rgba(242, 107, 33, 0.2);
 }
 
-.sale-badge{
 
-    position:absolute;
-    top:10px;
-    left:10px;
-    background:red;
-    color:white;
-    padding:5px 10px;
-    border-radius:5px;
-    font-size:14px;
+/* =====================================
+   IMAGE
+===================================== */
+
+.flash-card-image {
+    width: 100%;
+
+    height: 210px;
+
+    overflow: hidden;
+
+    background: #f7f8fc;
 }
 
-.price{
 
-    display:flex;
-    justify-content:center;
-    gap:10px;
-    margin:15px 0;
+.flash-card-image img {
+    width: 100%;
 
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+
+    transition:
+        transform 0.35s ease;
 }
 
-.new-price{
 
-    color:#f85606;
-    font-weight:bold;
-
+.flash-card:hover
+.flash-card-image img {
+    transform: scale(1.04);
 }
 
-.old-price{
 
-    text-decoration:line-through;
-    color:gray;
+/* =====================================
+   DETAILS
+===================================== */
 
+.flash-card-details {
+    padding: 18px;
+
+    text-align: center;
 }
 
-.flash-card button{
 
-    width:100%;
-    padding:12px;
-    border:none;
-    background:#f85606;
-    color:white;
-    border-radius:5px;
-    cursor:pointer;
+/* =====================================
+   LABEL
+===================================== */
 
+.flash-card-label {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #8b5cf6;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+}
+
+
+/* =====================================
+   PRODUCT NAME
+===================================== */
+
+.flash-card h3 {
+    min-height: 40px;
+
+    margin: 0;
+
+    color: #273142;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    line-height: 1.4;
+
+    display: -webkit-box;
+
+    -webkit-line-clamp: 2;
+
+    -webkit-box-orient: vertical;
+
+    overflow: hidden;
+}
+
+
+/* =====================================
+   PRICE
+===================================== */
+
+.price {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 9px;
+
+    margin-top: 12px;
+}
+
+
+.new-price {
+    color: #7c3aed;
+
+    font-family: Georgia, "Times New Roman", serif;
+
+    font-size: 20px;
+
+    font-weight: 700;
+}
+
+
+.old-price {
+    color: #9ca3af;
+
+    font-size: 12px;
+
+    text-decoration: line-through;
+}
+
+
+/* =====================================
+   ADD TO CART
+===================================== */
+
+.flash-card button {
+    width: 100%;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    margin-top: 16px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #7c3aed;
+
+    color: #ffffff;
+
+    font-family: inherit;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 5px 14px rgba(124, 58, 237, 0.18);
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.flash-card button:hover {
+    background: #6d28d9;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 7px 18px rgba(124, 58, 237, 0.25);
+}
+
+
+.flash-card button:active {
+    transform: translateY(0);
+}
+
+
+.flash-card button svg {
+    font-size: 12px;
+}
+
+
+/* =====================================
+   NOTICE
+===================================== */
+
+.flash-cart-notice {
+    margin: 9px 0 0;
+
+    padding: 8px 9px;
+
+    border-radius: 6px;
+
+    background: #fff7ed;
+
+    color: #b45309;
+
+    font-size: 10px;
+
+    line-height: 1.4;
+
+    text-align: center;
+}
+
+
+/* =====================================
+   RESPONSIVE
+===================================== */
+
+@media (max-width: 600px) {
+
+    .flash-card-image {
+        height: 250px;
+    }
+
+    .flash-card-details {
+        padding: 16px;
+    }
 }

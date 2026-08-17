@@ -55,39 +55,101 @@ function CustomerReview() {
     <>
       <Navbar />
 
-      <section className="reviews">
-        <div className="review-container">
+      <main className="customer-reviews-page">
+        <div className="customer-reviews-container">
 
-          <div className="reviews-header">
+          {/* HEADER */}
+          <div className="customer-reviews-header">
+            <span className="reviews-label">
+              CUSTOMER FEEDBACK
+            </span>
+
             <h1>Customer Reviews</h1>
-            <p>See what our happy customers say about us.</p>
+
+            <p>
+              See what our happy customers say about their
+              shopping experience with us.
+            </p>
           </div>
 
+          {/* REVIEW SUMMARY */}
+          <div className="reviews-summary">
+
+            <div className="rating-summary">
+              <div className="rating-number">4.8</div>
+
+              <div className="rating-stars">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <FaStar key={star} />
+                ))}
+              </div>
+
+              <p>Based on customer reviews</p>
+            </div>
+
+            <div className="review-summary-info">
+              <h2>What our customers say</h2>
+
+              <p>
+                We value every customer's experience. Here's
+                what shoppers have to say about our products,
+                delivery, and service.
+              </p>
+            </div>
+
+          </div>
+
+          {/* REVIEWS */}
           <div className="reviews-grid">
 
             {reviews.map((review) => (
-              <div
-                className="review-card"
+              <article
+                className="customer-review-card"
                 key={review.id}
               >
-                <div className="stars">
-                  {[...Array(review.rating)].map((_, index) => (
-                    <FaStar key={index} />
-                  ))}
+
+                <div className="review-card-top">
+
+                  <div className="review-avatar">
+                    {review.name.charAt(0)}
+                  </div>
+
+                  <div className="review-customer">
+
+                    <h3>{review.name}</h3>
+
+                    <span>Verified Customer</span>
+
+                  </div>
+
                 </div>
 
-                <p className="review-text">
+                <div className="review-stars">
+
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <FaStar
+                      key={star}
+                      className={
+                        star <= review.rating
+                          ? "star-filled"
+                          : "star-empty"
+                      }
+                    />
+                  ))}
+
+                </div>
+
+                <p className="customer-review-text">
                   "{review.review}"
                 </p>
 
-                <h3>{review.name}</h3>
-              </div>
+              </article>
             ))}
 
           </div>
 
         </div>
-      </section>
+      </main>
 
       <Footer />
     </>
