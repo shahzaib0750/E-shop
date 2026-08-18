@@ -26,6 +26,8 @@ venv/
 # Environment variables
 .env
 *.env
+!.env.example
+!backend/.env.example
 
 # Database files
 *.sqlite3

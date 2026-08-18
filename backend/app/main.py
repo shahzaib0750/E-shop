@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config import CORS_ORIGINS
 from app.database import Base, engine
 
 # Models
@@ -8,7 +9,7 @@ from app.models.user import User
 from app.models.product import Product
 from app.models.cart import Cart
 from app.models.orders import Order
-from app.models.order_Item import OrderItem
+from app.models.order_item import OrderItem
 from app.models.categories import Category
 from app.models.customer import Customer
 from app.models.seller import Seller
@@ -32,7 +33,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

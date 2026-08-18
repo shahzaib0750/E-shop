@@ -1,5 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL;
-console.log("API URL:", API_URL);
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
 export const apiFetch = async (endpoint, options = {}) => {
   const token = localStorage.getItem("token");
 
@@ -16,4 +17,24 @@ export const apiFetch = async (endpoint, options = {}) => {
     ...options,
     headers,
   });
+};
+
+// Reads a response body defensively: a 204 No Content has no body and
+// response.json() would throw on it.
+export const readJson = async (response) => {
+  if (response.status === 204) {
+    return {};
+  }
+
+  const text = await response.text();
+
+  if (!text) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {};
+  }
 };

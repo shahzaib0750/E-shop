@@ -15,6 +15,8 @@ import {
   useNavigate,
 } from "react-router-dom";
 
+import { apiFetch, readJson } from "../../../api/api";
+
 function CustomerDashboard() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -46,17 +48,11 @@ function CustomerDashboard() {
         return;
       }
 
-      const response = await fetch(
-        "http://127.0.0.1:8000/orders",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await apiFetch("/orders", {
+        method: "GET",
+      });
 
-      const data = await response.json();
+      const data = await readJson(response);
 
       if (response.status === 401) {
         localStorage.removeItem("token");
@@ -92,16 +88,12 @@ function CustomerDashboard() {
   }, [navigate, showMessage]);
 
   useEffect(() => {
-    if (location.state?.tab !== "orders") {
-      return;
-    }
-
     const timer = setTimeout(() => {
       fetchOrders();
     }, 0);
 
     return () => clearTimeout(timer);
-  }, [location.state?.tab, fetchOrders]);
+  }, [fetchOrders]);
 
   const cancelOrder = async (orderId) => {
     setMessage("");
@@ -115,17 +107,14 @@ function CustomerDashboard() {
     }
 
     try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/orders/${orderId}`,
+      const response = await apiFetch(
+        `/orders/${orderId}`,
         {
           method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
 
-      const data = await response.json();
+      const data = await readJson(response);
 
       if (response.status === 401) {
         localStorage.removeItem("token");

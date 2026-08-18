@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
 from app.models.product import Product
+from app.models.categories import Category
 
 load_dotenv()
 
@@ -34,7 +35,10 @@ def search_products(db: Session, message: str):
 
     keywords = extract_keywords(message)
 
-    query = db.query(Product)
+    query = (
+        db.query(Product)
+        .join(Product.category)
+    )
 
     for keyword in keywords:
 
@@ -46,7 +50,7 @@ def search_products(db: Session, message: str):
 
                 Product.brand.ilike(f"%{keyword}%"),
 
-                Product.category.ilike(f"%{keyword}%"),
+                Category.name.ilike(f"%{keyword}%"),
 
                 Product.description.ilike(f"%{keyword}%")
 
@@ -69,7 +73,7 @@ def build_product_context(products):
         context += f"""
 Product Name: {product.name}
 Brand: {product.brand}
-Category: {product.category}
+Category: {product.category.name if product.category else ""}
 Price: ${product.price}
 Description: {product.description}
 Stock: {product.stock}

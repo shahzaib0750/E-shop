@@ -1,14 +1,20 @@
 import "./Login.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { apiFetch } from "../../../../api/api";
+import { useAuth } from "../../../../context/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -18,77 +24,71 @@ function Login() {
   };
 
   const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  e.preventDefault();
-
-  try {
-
-    const response = await fetch(
-      "http://127.0.0.1:8000/login",
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-        },
-
-        body: JSON.stringify(formData),
-      }
-    );
-
-    const data = await response.json();
-
-    console.log(data);
-
-    if (response.ok) {
-
-      // Save JWT Token
-      localStorage.setItem(
-        "token",
-        data.access_token
-      );
-
-      // Save User
-      localStorage.setItem(
-        "user",
-        JSON.stringify(data.user)
-      );
-
-      alert(data.message);
-
-      if (data.user.role === "customer") {
-
-        navigate("/customer-dashboard");
-
-      } else if (data.user.role === "seller") {
-
-        navigate("/seller-dashboard");
-
-      }
-
-    } else {
-
-      alert(data.detail);
-
+    if (submitting) {
+      return;
     }
 
-  } catch (error) {
+    setSubmitting(true);
 
-    console.error(error);
+    try {
+      const response = await apiFetch("/login", {
+        method: "POST",
+        body: JSON.stringify(formData),
+      });
 
-    alert("Unable to connect to the server.");
+      const data = await response.json();
 
-  }
+      if (response.ok) {
+        // Save JWT Token
+        localStorage.setItem("token", data.access_token);
 
-};
+        // Save User
+        localStorage.setItem(
+          "user",
+          JSON.stringify(data.user)
+        );
+
+        // Keep the AuthContext in sync
+        login(data.user);
+
+        if (data.user.role === "customer") {
+          navigate(
+            location.state?.from || "/customer-dashboard"
+          );
+        } else if (data.user.role === "seller") {
+          navigate(
+            location.state?.from || "/seller-dashboard"
+          );
+        }
+      } else {
+        const message = Array.isArray(data.detail)
+          ? data.detail
+              .map((error) => {
+                const field =
+                  error.loc?.[error.loc.length - 1] || "field";
+                return `${field}: ${error.msg}`;
+              })
+              .join("\n")
+          : data.detail || "Invalid email or password";
+
+        alert(message);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Unable to connect to the server.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="login-page">
       <div className="login-card">
-
         <h1>Login</h1>
 
         <form onSubmit={handleSubmit}>
-
           <div className="input-group">
             <label>Email</label>
             <input
@@ -114,31 +114,25 @@ function Login() {
           </div>
 
           <div className="login-options">
-
             <label>
               <input type="checkbox" />
               Remember Me
             </label>
-
-            <Link to="/forgot-password">
-              Forgot Password?
-            </Link>
-
           </div>
 
-          <button type="submit" className="login-btn">
-            Login
+          <button
+            type="submit"
+            className="login-btn"
+            disabled={submitting}
+          >
+            {submitting ? "Logging in..." : "Login"}
           </button>
-
         </form>
 
         <p className="bottom-text">
           Don't have an account?{" "}
-          <Link to="/signup">
-            Create Account
-          </Link>
+          <Link to="/signup">Create Account</Link>
         </p>
-
       </div>
     </div>
   );

@@ -1,9 +1,11 @@
 import "./AddProduct.css";
 import { useState, useEffect, useCallback } from "react";
 import SellerSidebar from "./SellerSidebar";
+import { apiFetch } from "../../../api/api";
 
 function AddProduct() {
     const [categories, setCategories] = useState([]);
+    const [submitting, setSubmitting] = useState(false);
 
     const [product, setProduct] = useState({
         name: "",
@@ -17,8 +19,8 @@ function AddProduct() {
 
     const fetchCategories = useCallback(async () => {
         try {
-            const response = await fetch(
-                "http://127.0.0.1:8000/categories"
+            const response = await apiFetch(
+                "/categories"
             );
 
             const data = await response.json();
@@ -71,6 +73,10 @@ function AddProduct() {
             return;
         }
 
+        if (submitting) {
+            return;
+        }
+
         const payload = {
             name: product.name.trim(),
             description: product.description.trim(),
@@ -81,15 +87,13 @@ function AddProduct() {
             image: product.image.trim()
         };
 
+        setSubmitting(true);
+
         try {
-            const response = await fetch(
-                "http://127.0.0.1:8000/products",
+            const response = await apiFetch(
+                "/products",
                 {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`
-                    },
                     body: JSON.stringify(payload)
                 }
             );
@@ -155,6 +159,8 @@ function AddProduct() {
             alert(
                 "Unable to connect to server."
             );
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -368,8 +374,11 @@ function AddProduct() {
                             <button
                                 type="submit"
                                 className="add-product-btn"
+                                disabled={submitting}
                             >
-                                + Add Product
+                                {submitting
+                                    ? "Adding..."
+                                    : "+ Add Product"}
                             </button>
                         </div>
                     </form>

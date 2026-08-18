@@ -1,199 +1,431 @@
 import "./Products.css";
-import { useEffect, useState } from "react";
-import ProductCard from "../../../../src/productSection/productCard";
 
-const LIMIT = 12;
+import {
+    useCallback,
+    useEffect,
+    useState
+} from "react";
+
+import { useNavigate } from "react-router-dom";
+
+import SellerSidebar from "./SellerSidebar";
+import { apiFetch, readJson } from "../../../api/api";
 
 function Products() {
+    const navigate = useNavigate();
+
     const [products, setProducts] = useState([]);
-    const [page, setPage] = useState(1);
-    const [totalProducts, setTotalProducts] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [deletingId, setDeletingId] = useState(null);
 
-    useEffect(() => {
-        let cancelled = false;
+    const fetchProducts = useCallback(async () => {
+        const token = localStorage.getItem("token");
 
-        const loadProducts = async () => {
+        if (!token) {
+            alert("Please login first.");
+            navigate("/login");
+            return;
+        }
+
+        try {
             setLoading(true);
 
-            try {
-                const productsResponse = await fetch(
-                    `http://127.0.0.1:8000/products?page=${page}&limit=${LIMIT}`
+            const response = await apiFetch(
+                "/seller/products",
+                {
+                    method: "GET",
+                }
+            );
+
+            const data = await readJson(response);
+
+            if (response.status === 401) {
+                alert(
+                    "Your session has expired. Please login again."
                 );
 
-                if (!productsResponse.ok) {
-                    throw new Error("Unable to load products.");
-                }
-
-                const productsData = await productsResponse.json();
-
-                const countResponse = await fetch(
-                    "http://127.0.0.1:8000/products/count"
-                );
-
-                if (!countResponse.ok) {
-                    throw new Error("Unable to load product count.");
-                }
-
-                const countData = await countResponse.json();
-
-                if (cancelled) {
-                    return;
-                }
-
-                setProducts(
-                    Array.isArray(productsData) ? productsData : []
-                );
-
-                setTotalProducts(
-                    Number(countData.total) || 0
-                );
-            } catch (error) {
-                if (!cancelled) {
-                    console.error(
-                        "Load products error:",
-                        error
-                    );
-
-                    setProducts([]);
-                    setTotalProducts(0);
-                }
-            } finally {
-                if (!cancelled) {
-                    setLoading(false);
-                }
+                navigate("/login");
+                return;
             }
-        };
 
-        loadProducts();
+            if (response.status === 403) {
+                alert(
+                    "Only sellers can access their products."
+                );
 
-        return () => {
-            cancelled = true;
-        };
-    }, [page]);
+                return;
+            }
 
-    const totalPages = Math.ceil(
-        totalProducts / LIMIT
-    );
+            if (!response.ok) {
+                alert(
+                    data.detail ||
+                    "Unable to load your products."
+                );
 
-    const goToPreviousPage = () => {
-        if (page > 1) {
-            setPage((currentPage) => currentPage - 1);
+                return;
+            }
+
+            setProducts(
+                Array.isArray(data) ? data : []
+            );
+        } catch (error) {
+            console.error(
+                "Fetch seller products error:",
+                error
+            );
+
+            alert(
+                "Unable to connect to server."
+            );
+        } finally {
+            setLoading(false);
+        }
+    }, [navigate]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchProducts();
+        }, 0);
+
+        return () => clearTimeout(timer);
+    }, [fetchProducts]);
+
+    const handleDelete = async (product) => {
+        const confirmed = window.confirm(
+            `Delete "${product.name}"? This cannot be undone.`
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        if (deletingId) {
+            return;
+        }
+
+        setDeletingId(product.id);
+
+        try {
+            const response = await apiFetch(
+                `/products/${product.id}`,
+                {
+                    method: "DELETE",
+                }
+            );
+
+            const data = await readJson(response);
+
+            if (response.status === 401) {
+                alert(
+                    "Your session has expired. Please login again."
+                );
+
+                navigate("/login");
+                return;
+            }
+
+            if (!response.ok) {
+                alert(
+                    data.detail ||
+                    "Unable to delete product."
+                );
+
+                return;
+            }
+
+            setProducts((current) =>
+                current.filter(
+                    (item) => item.id !== product.id
+                )
+            );
+
+            alert(
+                data.message ||
+                "Product deleted successfully."
+            );
+        } catch (error) {
+            console.error(
+                "Delete product error:",
+                error
+            );
+
+            alert(
+                "Unable to connect to server."
+            );
+        } finally {
+            setDeletingId(null);
         }
     };
 
-    const goToNextPage = () => {
-        if (page < totalPages) {
-            setPage((currentPage) => currentPage + 1);
+    const getCategoryName = (product) => {
+        if (product.category?.name) {
+            return product.category.name;
         }
+
+        return `Category #${product.category_id}`;
+    };
+
+    const getImageUrl = (image) => {
+        if (!image) {
+            return "/images/placeholder.png";
+        }
+
+        if (
+            image.startsWith("http://") ||
+            image.startsWith("https://")
+        ) {
+            return image;
+        }
+
+        return `/images/${image}`;
+    };
+
+    const getStockClass = (stock) => {
+        if (Number(stock) <= 0) {
+            return "stock-badge out";
+        }
+
+        if (Number(stock) < 10) {
+            return "stock-badge low";
+        }
+
+        return "stock-badge";
+    };
+
+    const getStockLabel = (stock) => {
+        if (Number(stock) <= 0) {
+            return "Out";
+        }
+
+        return `${stock} in stock`;
     };
 
     return (
-        <section className="products">
-            <div className="products-container">
+        <div className="seller-layout">
+            <SellerSidebar />
 
-                <div className="products-header">
-                    <div>
-                        <span className="products-label">
-                            OUR COLLECTION
-                        </span>
+            <main className="seller-main-content">
+                <div className="products-page">
+                    <div className="products-header">
+                        <div>
+                            <p className="page-label">
+                                SELLER CENTER
+                            </p>
 
-                        <h2>
-                            Featured Products
-                        </h2>
+                            <h1>Products</h1>
 
-                        <p>
-                            Discover our latest products
-                            and find something you'll love.
-                        </p>
-                    </div>
-
-                    {!loading && totalProducts > 0 && (
-                        <div className="products-count">
-                            <strong>
-                                {totalProducts}
-                            </strong>
-
-                            <span>
-                                Products
-                            </span>
-                        </div>
-                    )}
-                </div>
-
-                {loading ? (
-                    <div className="products-loading">
-                        <div className="loading-spinner"></div>
-
-                        <p>
-                            Loading products...
-                        </p>
-                    </div>
-                ) : products.length === 0 ? (
-                    <div className="products-empty">
-                        <div className="empty-product-icon">
-                            📦
+                            <p className="page-description">
+                                Manage your product catalog.
+                            </p>
                         </div>
 
-                        <h3>
-                            No Products Found
-                        </h3>
-
-                        <p>
-                            There are currently no products
-                            available.
-                        </p>
+                        <a
+                            href="/seller/add-product"
+                            className="add-product-link"
+                        >
+                            <button
+                                type="button"
+                                className="add-btn"
+                            >
+                                + Add Product
+                            </button>
+                        </a>
                     </div>
-                ) : (
-                    <>
-                        <div className="products-grid">
-                            {products.map((product) => (
-                                <ProductCard
-                                    key={product.id}
-                                    product={product}
-                                />
-                            ))}
+
+                    <div className="products-card">
+                        <div className="products-card-header">
+                            <div>
+                                <h2>My Products</h2>
+
+                                <p>
+                                    View, edit and remove
+                                    products from your store.
+                                </p>
+                            </div>
+
+                            <div className="product-count">
+                                <span>
+                                    {products.length}
+                                </span>
+
+                                <small>Products</small>
+                            </div>
                         </div>
 
-                        {totalPages > 1 && (
-                            <div className="pagination">
-                                <button
-                                    type="button"
-                                    disabled={page === 1}
-                                    onClick={goToPreviousPage}
-                                >
-                                    ← Previous
-                                </button>
-
-                                <div className="pagination-info">
-                                    <span>
-                                        Page
-                                    </span>
-
-                                    <strong>
-                                        {page}
-                                    </strong>
-
-                                    <span>
-                                        of {totalPages}
-                                    </span>
+                        {loading ? (
+                            <div className="products-empty-state">
+                                <div className="loading-icon">
+                                    ⏳
                                 </div>
 
-                                <button
-                                    type="button"
-                                    disabled={
-                                        page === totalPages
-                                    }
-                                    onClick={goToNextPage}
+                                <h3>
+                                    Loading Products...
+                                </h3>
+
+                                <p>
+                                    Please wait while we
+                                    load your products.
+                                </p>
+                            </div>
+                        ) : products.length === 0 ? (
+                            <div className="products-empty-state">
+                                <div className="empty-icon">
+                                    📦
+                                </div>
+
+                                <h3>
+                                    No Products Yet
+                                </h3>
+
+                                <p>
+                                    Add your first product to
+                                    start selling on your
+                                    store.
+                                </p>
+
+                                <a
+                                    href="/seller/add-product"
+                                    className="empty-add-link"
                                 >
-                                    Next →
-                                </button>
+                                    + Add Product
+                                </a>
+                            </div>
+                        ) : (
+                            <div className="products-table-wrapper">
+                                <table className="products-table">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                Product
+                                            </th>
+
+                                            <th>
+                                                Category
+                                            </th>
+
+                                            <th>
+                                                Price
+                                            </th>
+
+                                            <th>
+                                                Stock
+                                            </th>
+
+                                            <th>
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {products.map(
+                                            (product) => (
+                                                <tr
+                                                    key={product.id}
+                                                >
+                                                    <td>
+                                                        <div className="product-info">
+                                                            <div className="product-image-wrapper">
+                                                                <img
+                                                                    src={getImageUrl(
+                                                                        product.image
+                                                                    )}
+                                                                    alt={product.name}
+                                                                    className="product-image"
+                                                                />
+                                                            </div>
+
+                                                            <div className="product-name">
+                                                                <strong>
+                                                                    {product.name}
+                                                                </strong>
+
+                                                                <span>
+                                                                    {
+                                                                        product.brand
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+
+                                                    <td>
+                                                        <span className="category-badge">
+                                                            {getCategoryName(
+                                                                product
+                                                            )}
+                                                        </span>
+                                                    </td>
+
+                                                    <td>
+                                                        <span className="product-price">
+                                                            Rs{" "}
+                                                            {Number(
+                                                                product.price ||
+                                                                0
+                                                            ).toFixed(
+                                                                2
+                                                            )}
+                                                        </span>
+                                                    </td>
+
+                                                    <td>
+                                                        <span
+                                                            className={getStockClass(
+                                                                product.stock
+                                                            )}
+                                                        >
+                                                            {getStockLabel(
+                                                                product.stock
+                                                            )}
+                                                        </span>
+                                                    </td>
+
+                                                    <td>
+                                                        <div className="product-actions">
+                                                            <button
+                                                                type="button"
+                                                                className="edit-btn"
+                                                                onClick={() =>
+                                                                    navigate(
+                                                                        `/seller/edit-product/${product.id}`
+                                                                    )
+                                                                }
+                                                            >
+                                                                Edit
+                                                            </button>
+
+                                                            <button
+                                                                type="button"
+                                                                className="delete-btn"
+                                                                disabled={
+                                                                    deletingId ===
+                                                                    product.id
+                                                                }
+                                                                onClick={() =>
+                                                                    handleDelete(
+                                                                        product
+                                                                    )
+                                                                }
+                                                            >
+                                                                {deletingId ===
+                                                                product.id
+                                                                    ? "Deleting..."
+                                                                    : "Delete"}
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
                         )}
-                    </>
-                )}
-            </div>
-        </section>
+                    </div>
+                </div>
+            </main>
+        </div>
     );
 }
 

@@ -1,6 +1,7 @@
 import "./ChatBot.css";
 import { useState } from "react";
 import { FaRobot, FaTimes } from "react-icons/fa";
+import { apiFetch } from "../../../api/api";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 
@@ -32,13 +33,9 @@ function ChatBot() {
 
         try {
 
-            const response = await fetch("http://127.0.0.1:8000/chatbot", {
+            const response = await apiFetch("/chatbot", {
 
                 method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
 
                 body: JSON.stringify({
                     message: text
@@ -46,11 +43,7 @@ function ChatBot() {
 
             });
 
-            console.log("Status:", response.status);
-
             const data = await response.json();
-
-            console.log("Response:", data);
 
             if (!response.ok) {
 

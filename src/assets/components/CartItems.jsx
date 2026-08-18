@@ -1,4 +1,4 @@
-import { apiFetch } from "../../api/api";
+import { apiFetch, readJson } from "../../api/api";
 
 function CartItem({ item, onCartUpdate }) {
   const updateQuantity = async (newQuantity) => {
@@ -14,7 +14,7 @@ function CartItem({ item, onCartUpdate }) {
         }),
       });
 
-      const data = await response.json();
+      const data = await readJson(response);
 
       if (!response.ok) {
         console.error(
@@ -46,7 +46,7 @@ function CartItem({ item, onCartUpdate }) {
         }
       );
 
-      const data = await response.json();
+      const data = await readJson(response);
 
       if (!response.ok) {
         console.error(
@@ -70,7 +70,9 @@ function CartItem({ item, onCartUpdate }) {
         src={
           item.image?.startsWith("http")
             ? item.image
-            : `/images/${item.image}`
+            : item.image
+              ? `/images/${item.image}`
+              : "/images/placeholder.png"
         }
         alt={item.name}
       />

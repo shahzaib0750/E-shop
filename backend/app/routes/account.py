@@ -12,6 +12,11 @@ from app.auth.jwt_handler import create_access_token
 
 router = APIRouter()
 
+# Pre-computed dummy hash so login runs the (deliberately slow) argon2
+# verify even when the email does not exist — otherwise response timing
+# reveals which emails are registered.
+_DUMMY_HASH = hash_password("dummy-password-for-constant-time")
+
 
 @router.post(
     "/signup",
@@ -126,7 +131,7 @@ def signup(
 
         raise HTTPException(
             status_code=500,
-            detail=str(e)
+            detail="Unable to create account."
         )
 
     return {
@@ -149,22 +154,24 @@ def login(
         .first()
     )
 
-    if not existing_user:
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid email or password"
-        )
+    # Run argon2 verify in both cases (real hash or dummy hash) so
+    # response time does not reveal whether the email is registered.
+    stored_hash = (
+        existing_user.password
+        if existing_user
+        else _DUMMY_HASH
+    )
 
     try:
         password_valid = verify_password(
             user.password,
-            existing_user.password
+            stored_hash
         )
 
     except Exception:
         password_valid = False
 
-    if not password_valid:
+    if not existing_user or not password_valid:
         raise HTTPException(
             status_code=401,
             detail="Invalid email or password"

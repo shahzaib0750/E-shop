@@ -7,7 +7,7 @@ import CartItem from "../../components/CartItems";
 import CartSummary from "../../components/CartSummary";
 
 import { useCallback, useEffect, useState } from "react";
-import { apiFetch } from "../../../api/api";
+import { apiFetch, readJson } from "../../../api/api";
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
@@ -100,7 +100,7 @@ function Cart() {
           method: "GET",
         });
 
-        const data = await response.json();
+        const data = await readJson(response);
 
         if (cancelled) {
           return;

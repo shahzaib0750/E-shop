@@ -6,60 +6,58 @@ import { useParams } from "react-router-dom";
 import Navbar from "../../components/navbar";
 import Footer from "../../Footer/footer";
 import ProductCard from "../../../productSection/productCard";
+import { apiFetch } from "../../../api/api";
 
 function CategoryProducts() {
   const { id } = useParams();
 
   const [products, setProducts] = useState([]);
   const [categoryName, setCategoryName] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
 
     const loadCategoryData = async () => {
+      setLoading(true);
+
       try {
         const [categoryResponse, productsResponse] =
           await Promise.all([
-            fetch(
-              `http://127.0.0.1:8000/categories/${id}`
-            ),
-            fetch(
-              `http://127.0.0.1:8000/categories/${id}/products`
-            ),
+            apiFetch(`/categories/${id}`),
+            apiFetch(`/categories/${id}/products`),
           ]);
-
-        const categoryData =
-          await categoryResponse.json();
-
-        const productsData =
-          await productsResponse.json();
-
-        if (cancelled) {
-          return;
-        }
 
         if (!categoryResponse.ok) {
           console.error(
-            categoryData.detail ||
-              "Unable to load category."
+            "Unable to load category."
           );
         } else {
-          setCategoryName(
-            categoryData.name || ""
-          );
+          const categoryData =
+            await categoryResponse.json();
+
+          if (!cancelled) {
+            setCategoryName(
+              categoryData.name || ""
+            );
+          }
         }
 
         if (!productsResponse.ok) {
           console.error(
-            productsData.detail ||
-              "Unable to load category products."
+            "Unable to load category products."
           );
         } else {
-          setProducts(
-            Array.isArray(productsData)
-              ? productsData
-              : []
-          );
+          const productsData =
+            await productsResponse.json();
+
+          if (!cancelled) {
+            setProducts(
+              Array.isArray(productsData)
+                ? productsData
+                : []
+            );
+          }
         }
       } catch (error) {
         if (!cancelled) {
@@ -67,6 +65,10 @@ function CategoryProducts() {
             "Category products error:",
             error
           );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
         }
       }
     };
@@ -85,25 +87,35 @@ function CategoryProducts() {
       <section className="category-products-page">
         <div className="container">
           <div className="category-title">
-            <h1>{categoryName}</h1>
+            <h1>{categoryName || "Category"}</h1>
 
             <p>
-              {products.length}{" "}
-              {products.length === 1
-                ? "Product"
-                : "Products"}{" "}
-              Found
+              {loading
+                ? "Loading..."
+                : `${products.length} ${
+                    products.length === 1
+                      ? "Product"
+                      : "Products"
+                  } Found`}
             </p>
           </div>
 
-          <div className="products-grid">
-            {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-              />
-            ))}
-          </div>
+          {loading ? (
+            <div className="products-loading">
+              <div className="loading-spinner"></div>
+
+              <p>Loading products...</p>
+            </div>
+          ) : (
+            <div className="products-grid">
+              {products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

@@ -9,6 +9,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import SellerSidebar from "./SellerSidebar";
+import { apiFetch } from "../../../api/api";
 
 function SellerDashboard() {
     const navigate = useNavigate();
@@ -28,28 +29,16 @@ function SellerDashboard() {
         try {
             setLoading(true);
 
-            const headers = {
-                Authorization: `Bearer ${token}`
-            };
-
             const [
                 ordersResponse,
                 productsResponse
             ] = await Promise.all([
-                fetch(
-                    "http://127.0.0.1:8000/seller/orders",
-                    {
-                        method: "GET",
-                        headers
-                    }
-                ),
-                fetch(
-                    "http://127.0.0.1:8000/seller/products",
-                    {
-                        method: "GET",
-                        headers
-                    }
-                )
+                apiFetch("/seller/orders", {
+                    method: "GET",
+                }),
+                apiFetch("/seller/products", {
+                    method: "GET",
+                })
             ]);
 
             const ordersData =
@@ -124,11 +113,24 @@ function SellerDashboard() {
         return () => clearTimeout(timer);
     }, [fetchDashboardData]);
 
-    const totalRevenue = orders.reduce(
-        (sum, order) =>
-            sum + Number(order.total || 0),
-        0
-    );
+    // The seller orders endpoint returns one row per line item, so a
+    // 3-item order appears 3 times. Count distinct order ids for the
+    // "orders" stat and exclude cancelled rows from revenue.
+    const orderCount = new Set(
+        orders.map((order) => order.order_id)
+    ).size;
+
+    const totalRevenue = orders
+        .filter(
+            (order) =>
+                String(order.status || "")
+                    .toLowerCase() !== "cancelled"
+        )
+        .reduce(
+            (sum, order) =>
+                sum + Number(order.total || 0),
+            0
+        );
 
     const pendingOrders = orders.filter(
         (order) =>
@@ -139,7 +141,7 @@ function SellerDashboard() {
     const completedOrders = orders.filter(
         (order) =>
             String(order.status || "")
-                .toLowerCase() === "completed"
+                .toLowerCase() === "delivered"
     ).length;
 
     const formatCurrency = (amount) => {
@@ -154,7 +156,7 @@ function SellerDashboard() {
         const value = String(status || "")
             .toLowerCase();
 
-        if (value === "completed") {
+        if (value === "completed" || value === "delivered") {
             return "status-completed";
         }
 
@@ -293,7 +295,7 @@ function SellerDashboard() {
                                     </div>
 
                                     <div className="stat-value">
-                                        {orders.length}
+                                        {orderCount}
                                     </div>
 
                                     <div className="stat-footer">
@@ -671,7 +673,7 @@ function SellerDashboard() {
 
                                             <strong>
                                                 {
-                                                    orders.length
+                                                    orderCount
                                                 }
                                             </strong>
                                         </div>

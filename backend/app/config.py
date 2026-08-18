@@ -77,3 +77,20 @@ if ACCESS_TOKEN_EXPIRE_MINUTES > 60:
     raise ValueError(
         "ACCESS_TOKEN_EXPIRE_MINUTES cannot exceed 60 minutes"
     )
+
+
+# ============================================================
+# CORS
+# ============================================================
+
+# Explicit origin allowlist (comma-separated). Never use a bare
+# "*" wildcard together with allow_credentials — Starlette then
+# reflects any Origin and treats every website as a trusted origin.
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173",
+    ).split(",")
+    if origin.strip()
+]

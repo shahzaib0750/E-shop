@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.dependencies import get_current_user
 from app.models.categories import Category
 from app.models.product import Product
+from app.models.user import User
 from app.schemas.categories import CategoryCreate
 
 router = APIRouter()
@@ -14,8 +17,14 @@ router = APIRouter()
 @router.post("/categories")
 def create_category(
     category: CategoryCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
+    if current_user.role != "seller":
+        raise HTTPException(
+            status_code=403,
+            detail="Only sellers can create categories"
+        )
 
     existing = (
         db.query(Category)
@@ -34,8 +43,19 @@ def create_category(
     )
 
     db.add(new_category)
-    db.commit()
-    db.refresh(new_category)
+
+    try:
+        db.commit()
+        db.refresh(new_category)
+
+    except IntegrityError:
+        # Lost the race against a concurrent create of the same name.
+        db.rollback()
+
+        raise HTTPException(
+            status_code=400,
+            detail="Category already exists"
+        )
 
     return new_category
 

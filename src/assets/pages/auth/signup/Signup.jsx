@@ -2,6 +2,7 @@
 import "./Signup.css";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { apiFetch } from "../../../../api/api";
 
 const passwordRules = (password) => ({
   length: password.length >= 8,
@@ -122,28 +123,15 @@ function Signup() {
       payload.cnic = cnic;
     }
 
-    console.log("Signup payload:", payload);
-
     setLoading(true);
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/signup",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      console.log("Signup HTTP status:", response.status);
+      const response = await apiFetch("/signup", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
 
       const data = await response.json();
-
-      console.log("Signup response:", data);
 
       if (response.ok) {
         alert("Account created successfully!");

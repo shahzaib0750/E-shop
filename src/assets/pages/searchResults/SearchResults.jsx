@@ -1,16 +1,81 @@
 import "./SearchResults.css";
-import { useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import Navbar from "../../components/navbar";
 import Footer from "../../Footer/footer";
 import ProductCard from "../../../../src/productSection/productCard";
+import { apiFetch } from "../../../api/api";
 
 function SearchResults() {
 
-    const location = useLocation();
+    const [searchParams] = useSearchParams();
 
-    const products = location.state?.products || [];
-    const keyword = location.state?.keyword || "";
+    const keyword = searchParams.get("q") || "";
+
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        let cancelled = false;
+
+        const runSearch = async () => {
+            setLoading(true);
+            setError("");
+
+            if (!keyword) {
+                if (!cancelled) {
+                    setProducts([]);
+                    setLoading(false);
+                }
+                return;
+            }
+
+            try {
+                const response = await apiFetch(
+                    `/products/search?keyword=${encodeURIComponent(keyword)}`
+                );
+
+                if (cancelled) {
+                    return;
+                }
+
+                if (!response.ok) {
+                    setError(
+                        "Unable to load search results."
+                    );
+                    return;
+                }
+
+                const data = await response.json();
+
+                setProducts(
+                    Array.isArray(data) ? data : []
+                );
+            } catch (err) {
+                if (!cancelled) {
+                    console.error(
+                        "Search error:",
+                        err
+                    );
+                    setError(
+                        "Unable to connect to server."
+                    );
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        runSearch();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [keyword]);
 
     return (
         <>
@@ -23,18 +88,27 @@ function SearchResults() {
                     <h1>Search Results</h1>
 
                     <p>
-                        {products.length} result(s) found for
-                        <strong> "{keyword}"</strong>
+                        {loading
+                            ? "Searching..."
+                            : `${products.length} result(s) found for`}
+                        {!loading && (
+                            <strong> "{keyword}"</strong>
+                        )}
                     </p>
 
-                    {products.length === 0 ? (
-
+                    {loading ? (
+                        <div className="no-products">
+                            <h2>Loading...</h2>
+                        </div>
+                    ) : error ? (
+                        <div className="no-products">
+                            <h2>{error}</h2>
+                        </div>
+                    ) : products.length === 0 ? (
                         <div className="no-products">
                             <h2>No Products Found</h2>
                         </div>
-
                     ) : (
-
                         <div className="products-grid">
 
                             {products.map((product) => (
@@ -47,7 +121,6 @@ function SearchResults() {
                             ))}
 
                         </div>
-
                     )}
 
                 </div>

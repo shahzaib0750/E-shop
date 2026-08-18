@@ -25,42 +25,13 @@ function Navbar() {
 
     const handleSearch = async () => {
 
-        if (!search.trim()) return;
+        const keyword = search.trim();
 
-        try {
+        if (!keyword) return;
 
-            const response = await fetch(
-                `http://127.0.0.1:8000/products/search?keyword=${search}`
-            );
-
-            const data = await response.json();
-
-            if (response.ok) {
-
-                navigate("/search", {
-                    state: {
-                        products: data,
-                        keyword: search,
-                    },
-                });
-
-            } else {
-
-                alert(
-                    data.detail ||
-                    "Unable to search products."
-                );
-
-            }
-
-        } catch (error) {
-
-            console.error(error);
-
-            alert(
-                "Unable to connect to server."
-            );
-        }
+        // Keep the keyword in the URL so the search survives a
+        // refresh or a shared link.
+        navigate(`/search?q=${encodeURIComponent(keyword)}`);
     };
 
 

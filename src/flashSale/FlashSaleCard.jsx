@@ -1,7 +1,8 @@
 import "./FlashSaleCard.css";
 import { FaShoppingCart } from "react-icons/fa";
 import { useState } from "react";
-import { useCart } from "../../src/cartContext/UseCart";
+import { useCart } from "../cartContext/UseCart";
+import { apiFetch, readJson } from "../api/api";
 
 function FlashSaleCard({ product }) {
 
@@ -45,15 +46,10 @@ function FlashSaleCard({ product }) {
 
         try {
 
-            const response = await fetch(
-                "http://127.0.0.1:8000/cart",
+            const response = await apiFetch(
+                "/cart",
                 {
                     method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
 
                     body: JSON.stringify({
                         product_id: product.id,
@@ -63,7 +59,7 @@ function FlashSaleCard({ product }) {
             );
 
 
-            const data = await response.json();
+            const data = await readJson(response);
 
 
             if (response.ok) {
@@ -106,9 +102,13 @@ function FlashSaleCard({ product }) {
                 SALE BADGE
             ================================== */}
 
-            <div className="sale-badge">
-                -{product.discount}%
-            </div>
+            {product.discount > 0 && (
+
+                <div className="sale-badge">
+                    -{product.discount}%
+                </div>
+
+            )}
 
 
             {/* ==================================
@@ -118,7 +118,13 @@ function FlashSaleCard({ product }) {
             <div className="flash-card-image">
 
                 <img
-                    src={product.image}
+                    src={
+                        product.image?.startsWith("http")
+                            ? product.image
+                            : product.image
+                              ? `/images/${product.image}`
+                              : "/images/placeholder.png"
+                    }
                     alt={product.name}
                 />
 
@@ -149,9 +155,13 @@ function FlashSaleCard({ product }) {
                         ${Number(product.price).toFixed(2)}
                     </span>
 
-                    <span className="old-price">
-                        ${Number(product.oldPrice).toFixed(2)}
-                    </span>
+                    {product.oldPrice > 0 && (
+
+                        <span className="old-price">
+                            ${Number(product.oldPrice).toFixed(2)}
+                        </span>
+
+                    )}
 
                 </div>
 

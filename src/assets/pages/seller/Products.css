@@ -1,4 +1,32 @@
 /* =====================================
+   LAYOUT (shared seller shell)
+===================================== */
+
+.seller-layout {
+    min-height: 100vh;
+
+    display: flex;
+
+    background: #f6f7fb;
+}
+
+.seller-main-content {
+    flex: 1;
+
+    min-width: 0;
+
+    padding: 32px;
+}
+
+@media (max-width: 768px) {
+
+    .seller-main-content {
+        padding: 24px 18px;
+    }
+}
+
+
+/* =====================================
    PRODUCTS PAGE
 ===================================== */
 

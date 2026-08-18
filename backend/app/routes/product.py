@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -6,6 +7,7 @@ from app.database import get_db
 from app.models.product import Product
 from app.models.user import User
 from app.models.categories import Category
+from app.models.order_item import OrderItem
 from app.schemas.product import (
     ProductCreate,
     ProductUpdate,
@@ -16,8 +18,6 @@ from app.dependencies import get_current_user
 
 router = APIRouter()
 
-
-# Product
 
 @router.post("/products")
 def create_product(
@@ -43,6 +43,12 @@ def create_product(
             detail="Category not found",
         )
 
+    if product.stock < 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Stock cannot be negative",
+        )
+
     new_product = Product(
         name=product.name.strip(),
         description=product.description.strip(),
@@ -59,8 +65,18 @@ def create_product(
     try:
         db.commit()
         db.refresh(new_product)
+
+    except IntegrityError:
+        db.rollback()
+
+        raise HTTPException(
+            status_code=400,
+            detail="Unable to create product",
+        )
+
     except Exception:
         db.rollback()
+
         raise HTTPException(
             status_code=500,
             detail="Unable to create product",
@@ -225,14 +241,31 @@ def update_product(
             update_data["image"].strip()
         )
 
+    if "stock" in update_data:
+        if update_data["stock"] < 0:
+            raise HTTPException(
+                status_code=400,
+                detail="Stock cannot be negative",
+            )
+
     for key, value in update_data.items():
         setattr(product, key, value)
 
     try:
         db.commit()
         db.refresh(product)
+
+    except IntegrityError:
+        db.rollback()
+
+        raise HTTPException(
+            status_code=400,
+            detail="Unable to update product",
+        )
+
     except Exception:
         db.rollback()
+
         raise HTTPException(
             status_code=500,
             detail="Unable to update product",
@@ -274,11 +307,40 @@ def delete_product(
             detail="You are not allowed to delete this product",
         )
 
+    order_history = (
+        db.query(OrderItem.id)
+        .filter(OrderItem.product_id == product.id)
+        .first()
+    )
+
+    if order_history:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "This product cannot be deleted because it has "
+                "existing order history. You can update the "
+                "product or set its stock to 0 instead."
+            ),
+        )
+
     try:
         db.delete(product)
         db.commit()
+
+    except IntegrityError:
+        db.rollback()
+
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "This product cannot be deleted because it is "
+                "used by existing records."
+            ),
+        )
+
     except Exception:
         db.rollback()
+
         raise HTTPException(
             status_code=500,
             detail="Unable to delete product",
@@ -305,5 +367,6 @@ def get_my_products(
         .filter(
             Product.seller_id == current_user.id
         )
+        .order_by(Product.id.desc())
         .all()
     )

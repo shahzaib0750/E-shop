@@ -1,6 +1,7 @@
 import "./ProductDetails.css";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { apiFetch } from "../../../api/api";
 
 function ProductDetails() {
     const { id } = useParams();
@@ -9,24 +10,26 @@ function ProductDetails() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [notice, setNotice] = useState("");
+    const [adding, setAdding] = useState(false);
 
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await fetch(
-                    `http://127.0.0.1:8000/products/${id}`
+                const response = await apiFetch(
+                    `/products/${id}`
                 );
-
-                if (!response.ok) {
-                    throw new Error("Product not found");
-                }
 
                 const data = await response.json();
 
-                setProduct(data);
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail || "Product not found"
+                    );
+                }
 
-            } catch (error) {
-                console.error(error);
+                setProduct(data);
+            } catch (err) {
+                console.error(err);
                 setError("Unable to load product.");
             } finally {
                 setLoading(false);
@@ -36,21 +39,51 @@ function ProductDetails() {
         fetchProduct();
     }, [id]);
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
         const token = localStorage.getItem("token");
         const user = JSON.parse(localStorage.getItem("user") || "null");
 
-        if (!token) {
+        if (!token || !user) {
             setNotice("Please login first.");
             return;
         }
 
-        if (user?.role === "seller") {
+        if (user.role === "seller") {
             setNotice("Seller accounts cannot add products to cart. Please use a customer account.");
             return;
         }
 
-        setNotice("Please use the product cards on the home page to add items to cart.");
+        if (adding) {
+            return;
+        }
+
+        setAdding(true);
+        setNotice("");
+
+        try {
+            const response = await apiFetch("/cart", {
+                method: "POST",
+                body: JSON.stringify({
+                    product_id: product.id,
+                    quantity: 1,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setNotice("Product added to cart.");
+            } else {
+                setNotice(
+                    data.detail || "Unable to add product to cart."
+                );
+            }
+        } catch (err) {
+            console.error(err);
+            setNotice("Unable to connect to server.");
+        } finally {
+            setAdding(false);
+        }
     };
 
     if (loading) {
@@ -105,10 +138,10 @@ function ProductDetails() {
 
                     <button
                         className="add-cart-btn"
-                        disabled={product.stock === 0}
+                        disabled={product.stock === 0 || adding}
                         onClick={handleAddToCart}
                     >
-                        Add to Cart
+                        {adding ? "Adding..." : "Add to Cart"}
                     </button>
 
                     {notice && (

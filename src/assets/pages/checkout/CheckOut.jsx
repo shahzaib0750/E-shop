@@ -72,8 +72,6 @@ function CheckOut() {
 
                 const data = await response.json();
 
-                console.log("Checkout cart:", data);
-
                 if (response.status === 401) {
                     localStorage.removeItem("token");
                     localStorage.removeItem("user");
@@ -205,8 +203,6 @@ function CheckOut() {
             });
 
             const data = await response.json();
-
-            console.log("Order response:", data);
 
             if (response.status === 401) {
                 localStorage.removeItem("token");

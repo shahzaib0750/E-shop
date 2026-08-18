@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.cart import Cart
-from app.models.order_Item import OrderItem
+from app.models.order_item import OrderItem
 from app.models.orders import Order
 from app.models.product import Product
 from app.models.user import User
@@ -31,8 +31,13 @@ def create_order(
     try:
         cart_items = (
             db.query(Cart, Product)
-            .join(Product, Cart.product_id == Product.id)
-            .filter(Cart.user_id == current_user.id)
+            .join(
+                Product,
+                Cart.product_id == Product.id,
+            )
+            .filter(
+                Cart.user_id == current_user.id,
+            )
             .with_for_update()
             .all()
         )
@@ -44,49 +49,53 @@ def create_order(
             )
 
         total_amount = Decimal("0.00")
-
         locked_products = []
 
         for cart, product in cart_items:
-            locked_product = (
-                db.query(Product)
-                .filter(Product.id == product.id)
-                .with_for_update()
-                .first()
-            )
-
-            if not locked_product:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"Product {product.id} not found.",
-                )
-
+            # `product` is already returned (and row-locked) by the
+            # join above — no need to re-query each product.
             if cart.quantity <= 0:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Invalid quantity for {locked_product.name}.",
+                    detail=(
+                        f"Invalid quantity for "
+                        f"{product.name}."
+                    ),
                 )
 
-            if cart.quantity > locked_product.stock:
+            if cart.quantity > product.stock:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Not enough stock for {locked_product.name}.",
+                    detail=(
+                        f"Not enough stock for "
+                        f"{product.name}."
+                    ),
                 )
 
             total_amount += (
-                Decimal(str(locked_product.price))
+                Decimal(str(product.price))
                 * cart.quantity
             )
 
             locked_products.append(
-                (cart, locked_product)
+                (cart, product)
+            )
+
+        shipping_address = (
+            order_data.shipping_address.strip()
+        )
+
+        if not shipping_address:
+            raise HTTPException(
+                status_code=400,
+                detail="Shipping address cannot be empty.",
             )
 
         new_order = Order(
             user_id=current_user.id,
             total_amount=total_amount,
             status="pending",
-            shipping_address=order_data.shipping_address.strip(),
+            shipping_address=shipping_address,
         )
 
         db.add(new_order)
@@ -112,7 +121,9 @@ def create_order(
         return {
             "message": "Order created successfully",
             "order_id": new_order.id,
-            "total_amount": float(new_order.total_amount),
+            "total_amount": float(
+                new_order.total_amount
+            ),
             "status": new_order.status,
         }
 
@@ -123,7 +134,10 @@ def create_order(
     except Exception as error:
         db.rollback()
 
-        print("ORDER CREATION ERROR:", repr(error))
+        print(
+            "ORDER CREATION ERROR:",
+            repr(error),
+        )
 
         raise HTTPException(
             status_code=500,
@@ -144,15 +158,21 @@ def get_my_orders(
 
     orders = (
         db.query(Order)
-        .filter(Order.user_id == current_user.id)
-        .order_by(Order.created_at.desc())
+        .filter(
+            Order.user_id == current_user.id,
+        )
+        .order_by(
+            Order.created_at.desc(),
+        )
         .all()
     )
 
     return [
         {
             "order_id": order.id,
-            "total_amount": float(order.total_amount),
+            "total_amount": float(
+                order.total_amount
+            ),
             "status": order.status,
             "shipping_address": order.shipping_address,
             "created_at": order.created_at,
@@ -188,7 +208,9 @@ def get_order_details(
             Product,
             OrderItem.product_id == Product.id,
         )
-        .filter(OrderItem.order_id == order_id)
+        .filter(
+            OrderItem.order_id == order_id,
+        )
         .all()
     )
 
@@ -210,7 +232,9 @@ def get_order_details(
     return {
         "order_id": order.id,
         "status": order.status,
-        "total_amount": float(order.total_amount),
+        "total_amount": float(
+            order.total_amount
+        ),
         "shipping_address": order.shipping_address,
         "created_at": order.created_at,
         "items": items,
@@ -241,13 +265,17 @@ def cancel_order(
     if order.status != "pending":
         raise HTTPException(
             status_code=400,
-            detail="Only pending orders can be cancelled.",
+            detail=(
+                "Only pending orders can be cancelled."
+            ),
         )
 
     try:
         order_items = (
             db.query(OrderItem)
-            .filter(OrderItem.order_id == order_id)
+            .filter(
+                OrderItem.order_id == order_id,
+            )
             .with_for_update()
             .all()
         )
@@ -255,7 +283,9 @@ def cancel_order(
         for item in order_items:
             product = (
                 db.query(Product)
-                .filter(Product.id == item.product_id)
+                .filter(
+                    Product.id == item.product_id,
+                )
                 .with_for_update()
                 .first()
             )
@@ -270,7 +300,10 @@ def cancel_order(
     except Exception as error:
         db.rollback()
 
-        print("ORDER CANCELLATION ERROR:", repr(error))
+        print(
+            "ORDER CANCELLATION ERROR:",
+            repr(error),
+        )
 
         raise HTTPException(
             status_code=500,
@@ -290,7 +323,9 @@ def seller_view_orders(
     if current_user.role != "seller":
         raise HTTPException(
             status_code=403,
-            detail="Only sellers can access seller orders.",
+            detail=(
+                "Only sellers can access seller orders."
+            ),
         )
 
     orders = (
@@ -306,7 +341,9 @@ def seller_view_orders(
         .filter(
             Product.seller_id == current_user.id,
         )
-        .order_by(Order.created_at.desc())
+        .order_by(
+            Order.created_at.desc(),
+        )
         .all()
     )
 
@@ -329,7 +366,9 @@ def seller_view_orders(
     ]
 
 
-@router.put("/seller/orders/{order_id}/status")
+@router.put(
+    "/seller/orders/{order_id}/status"
+)
 def update_order_status(
     order_id: int,
     status_data: OrderStatusUpdate,
@@ -339,7 +378,9 @@ def update_order_status(
     if current_user.role != "seller":
         raise HTTPException(
             status_code=403,
-            detail="Only sellers can update order status.",
+            detail=(
+                "Only sellers can update order status."
+            ),
         )
 
     allowed_status = {
@@ -350,7 +391,9 @@ def update_order_status(
         "cancelled",
     }
 
-    new_status = status_data.status.strip().lower()
+    new_status = (
+        status_data.status.strip().lower()
+    )
 
     if new_status not in allowed_status:
         raise HTTPException(
@@ -381,7 +424,38 @@ def update_order_status(
             detail="Order not found.",
         )
 
+    if order.status == "cancelled":
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Cancelled orders cannot be updated."
+            ),
+        )
+
     try:
+        if new_status == "cancelled":
+            order_items = (
+                db.query(OrderItem)
+                .filter(
+                    OrderItem.order_id == order.id,
+                )
+                .with_for_update()
+                .all()
+            )
+
+            for item in order_items:
+                product = (
+                    db.query(Product)
+                    .filter(
+                        Product.id == item.product_id,
+                    )
+                    .with_for_update()
+                    .first()
+                )
+
+                if product:
+                    product.stock += item.quantity
+
         order.status = new_status
 
         db.commit()
@@ -390,15 +464,22 @@ def update_order_status(
     except Exception as error:
         db.rollback()
 
-        print("ORDER STATUS ERROR:", repr(error))
+        print(
+            "ORDER STATUS ERROR:",
+            repr(error),
+        )
 
         raise HTTPException(
             status_code=500,
-            detail="Unable to update order status.",
+            detail=(
+                "Unable to update order status."
+            ),
         )
 
     return {
-        "message": "Order status updated successfully.",
+        "message": (
+            "Order status updated successfully."
+        ),
         "order_id": order.id,
         "status": order.status,
     }

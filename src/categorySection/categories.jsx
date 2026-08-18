@@ -5,6 +5,7 @@ import {
     useEffect,
     useState,
 } from "react";
+import { apiFetch } from "../api/api";
 
 function Categories() {
     const [categories, setCategories] = useState([]);
@@ -12,8 +13,8 @@ function Categories() {
 
     const fetchCategories = useCallback(async () => {
         try {
-            const response = await fetch(
-                "http://127.0.0.1:8000/categories"
+            const response = await apiFetch(
+                "/categories"
             );
 
             const data = await response.json();

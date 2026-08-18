@@ -5,6 +5,7 @@ import Footer from "../../Footer/footer";
 
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { apiFetch } from "../../../api/api";
 
 function OrderDetails() {
 
@@ -26,12 +27,12 @@ function OrderDetails() {
 
         const token = localStorage.getItem("token");
 
-        const response = await fetch(
-          `http://127.0.0.1:8000/orders/details/${id}`,
+        const response = await apiFetch(
+          `/orders/details/${id}`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: token
+              ? { Authorization: `Bearer ${token}` }
+              : {},
           }
         );
 
@@ -39,7 +40,12 @@ function OrderDetails() {
 
         if (!response.ok) {
 
-          setError(data.detail);
+          const message =
+            typeof data.detail === "string"
+              ? data.detail
+              : "Unable to load order.";
+
+          setError(message);
 
           return;
 
@@ -50,8 +56,6 @@ function OrderDetails() {
       }
 
       catch (error) {
-
-        console.log(error);
 
         setError("Unable to load order.");
 
@@ -176,49 +180,54 @@ function OrderDetails() {
 
           <div className="products-list">
 
-            {order.items.map((item) => (
+            {(order.items || []).map((item) => {
 
-              <div
-                className="product-card"
-                key={item.product_id}
-              >
+              const imageSrc =
+                item.image?.startsWith("http")
+                  ? item.image
+                  : "/images/placeholder.png";
 
-                <img
-                  src={
-                    item.image.startsWith("http")
-                      ? item.image
-                      : `/images/${item.image}`
-                  }
-                  alt={item.name}
-                />
+              return (
 
-                <div className="product-info">
+                <div
+                  className="product-card"
+                  key={item.product_id}
+                >
 
-                  <h3>{item.name}</h3>
+                  <img
+                    src={imageSrc}
+                    alt={item.name || "Product"}
+                  />
 
-                  <p>Brand: {item.brand}</p>
+                  <div className="product-info">
 
-                  <p>Quantity: {item.quantity}</p>
+                    <h3>{item.name}</h3>
 
-                  <p>
+                    <p>Brand: {item.brand}</p>
 
-                    Price: ${item.price}
+                    <p>Quantity: {item.quantity}</p>
 
-                  </p>
+                    <p>
+
+                      Price: ${item.price}
+
+                    </p>
+
+                  </div>
+
+                  <h3>
+
+                    $
+
+                    {Number(item.subtotal).toFixed(2)}
+
+                  </h3>
 
                 </div>
 
-                <h3>
+              );
 
-                  $
-
-                  {Number(item.subtotal).toFixed(2)}
-
-                </h3>
-
-              </div>
-
-            ))}
+            })}
 
           </div>
 

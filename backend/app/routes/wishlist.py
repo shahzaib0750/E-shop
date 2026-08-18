@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
 from app.dependencies import get_current_user
@@ -31,6 +31,9 @@ def get_wishlist(
 
     items = (
         db.query(WishlistItem)
+        .options(
+            joinedload(WishlistItem.product)
+        )
         .filter(
             WishlistItem.user_id == current_user.id
         )

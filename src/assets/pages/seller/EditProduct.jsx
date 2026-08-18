@@ -12,6 +12,7 @@ import {
 } from "react-router-dom";
 
 import SellerSidebar from "./SellerSidebar";
+import { apiFetch } from "../../../api/api";
 
 function EditProduct() {
     const { id } = useParams();
@@ -44,13 +45,10 @@ function EditProduct() {
             setLoading(true);
             setError("");
 
-            const response = await fetch(
-                `http://127.0.0.1:8000/products/${id}`,
+            const response = await apiFetch(
+                `/products/${id}`,
                 {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
+                    method: "GET"
                 }
             );
 
@@ -201,14 +199,10 @@ function EditProduct() {
         setSaving(true);
 
         try {
-            const response = await fetch(
-                `http://127.0.0.1:8000/products/${id}`,
+            const response = await apiFetch(
+                `/products/${id}`,
                 {
                     method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`
-                    },
                     body: JSON.stringify({
                         name,
                         description,

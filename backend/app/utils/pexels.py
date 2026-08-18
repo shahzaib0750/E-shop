@@ -6,8 +6,15 @@ load_dotenv()
 
 PEXELS_API_KEY = os.getenv("PEXELS_API_KEY")
 
+# via.placeholder.com is shut down; product.image is NOT NULL, so the
+# fallback must always be a live, loadable URL.
+FALLBACK_IMAGE = "https://placehold.co/400x400?text=No+Image"
+
 
 def get_product_image(query):
+
+    if not PEXELS_API_KEY:
+        return FALLBACK_IMAGE
 
     url = "https://api.pexels.com/v1/search"
 
@@ -20,17 +27,26 @@ def get_product_image(query):
         "per_page": 1
     }
 
-    response = requests.get(
-        url,
-        headers=headers,
-        params=params
-    )
+    try:
+        response = requests.get(
+            url,
+            headers=headers,
+            params=params,
+            timeout=10,
+        )
 
-    if response.status_code == 200:
+        response.raise_for_status()
 
         data = response.json()
 
-        if data["photos"]:
-            return data["photos"][0]["src"]["large"]
+        photos = data.get("photos") or []
 
-    return "https://via.placeholder.com/400"
+        if photos:
+            return photos[0]["src"]["large"]
+
+    except (requests.RequestException, ValueError):
+        # Network error, timeout, or malformed response — fall through
+        # to the placeholder so seeding never crashes on one bad image.
+        pass
+
+    return FALLBACK_IMAGE

@@ -9,6 +9,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import SellerSidebar from "./SellerSidebar";
+import { apiFetch } from "../../../api/api";
 
 function SellerOrders() {
     const navigate = useNavigate();
@@ -30,23 +31,15 @@ function SellerOrders() {
         try {
             setLoading(true);
 
-            const response = await fetch(
-                "http://127.0.0.1:8000/seller/orders",
+            const response = await apiFetch(
+                "/seller/orders",
                 {
                     method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
                 }
             );
 
             const data =
                 await response.json();
-
-            console.log(
-                "Seller Orders:",
-                data
-            );
 
             if (response.status === 401) {
                 alert(
@@ -117,16 +110,10 @@ function SellerOrders() {
         try {
             setUpdatingOrder(orderId);
 
-            const response = await fetch(
-                `http://127.0.0.1:8000/seller/orders/${orderId}/status`,
+            const response = await apiFetch(
+                `/seller/orders/${orderId}/status`,
                 {
                     method: "PUT",
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-                        Authorization:
-                            `Bearer ${token}`
-                    },
                     body: JSON.stringify({
                         status
                     })
@@ -333,7 +320,9 @@ function SellerOrders() {
                                                                             "http"
                                                                         )
                                                                             ? order.image
-                                                                            : `/images/${order.image}`
+                                                                            : order.image
+                                                                              ? `/images/${order.image}`
+                                                                              : "/images/placeholder.png"
                                                                     }
                                                                     alt={
                                                                         order.product_name ||
