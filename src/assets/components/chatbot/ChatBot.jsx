@@ -6,9 +6,7 @@ import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 
 function ChatBot() {
-
     const [open, setOpen] = useState(false);
-
     const [loading, setLoading] = useState(false);
 
     const [messages, setMessages] = useState([
@@ -19,72 +17,112 @@ function ChatBot() {
     ]);
 
     const sendMessage = async (text) => {
+        if (!text.trim() || loading) return;
 
-        if (!text.trim()) return;
-
-        const userMessage = {
-            sender: "user",
-            text: text
-        };
-
-        setMessages(prev => [...prev, userMessage]);
+        setMessages((prev) => [
+            ...prev,
+            {
+                sender: "user",
+                text
+            },
+            {
+                sender: "bot",
+                text: ""
+            }
+        ]);
 
         setLoading(true);
 
         try {
-
-            const response = await apiFetch("/chatbot", {
-
+            const response = await apiFetch("/chatbot/stream", {
                 method: "POST",
-
                 body: JSON.stringify({
                     message: text
                 })
-
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
+                let errorMessage = "Request failed.";
 
-                throw new Error(
-                    data.detail || "Request failed."
-                );
+                try {
+                    const data = await response.json();
+                    errorMessage = data.detail || errorMessage;
+                } catch {
+                    // Ignore JSON parsing error
+                }
 
+                throw new Error(errorMessage);
             }
 
-            setMessages(prev => [
-                ...prev,
-                {
-                    sender: "bot",
-                    text: data.reply
-                }
-            ]);
+            if (!response.body) {
+                throw new Error("Streaming is not supported by this response.");
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+
+            let botResponse = "";
+
+            while (true) {
+                const { value, done } = await reader.read();
+
+                if (done) break;
+
+                const chunk = decoder.decode(value, {
+                    stream: true
+                });
+
+                botResponse += chunk;
+
+                setMessages((prev) => {
+                    const updated = [...prev];
+
+                    updated[updated.length - 1] = {
+                        sender: "bot",
+                        text: botResponse
+                    };
+
+                    return updated;
+                });
+            }
+
+            const finalChunk = decoder.decode();
+
+            if (finalChunk) {
+                botResponse += finalChunk;
+
+                setMessages((prev) => {
+                    const updated = [...prev];
+
+                    updated[updated.length - 1] = {
+                        sender: "bot",
+                        text: botResponse
+                    };
+
+                    return updated;
+                });
+            }
 
         } catch (error) {
+            console.error("Chatbot error:", error);
 
-            console.error(error);
+            setMessages((prev) => {
+                const updated = [...prev];
 
-            setMessages(prev => [
-                ...prev,
-                {
+                updated[updated.length - 1] = {
                     sender: "bot",
                     text: "❌ " + error.message
-                }
-            ]);
+                };
 
+                return updated;
+            });
         } finally {
-
             setLoading(false);
-
         }
-
     };
 
     return (
-
         <>
-
             <button
                 className="chat-toggle"
                 onClick={() => setOpen(!open)}
@@ -93,7 +131,6 @@ function ChatBot() {
             </button>
 
             {open && (
-
                 <div className="chat-window">
 
                     <div className="chat-header">
@@ -101,27 +138,12 @@ function ChatBot() {
                     </div>
 
                     <div className="chat-body">
-
                         {messages.map((msg, index) => (
-
                             <ChatMessage
                                 key={index}
                                 message={msg}
                             />
-
                         ))}
-
-                        {loading && (
-
-                            <ChatMessage
-                                message={{
-                                    sender: "bot",
-                                    text: "Thinking..."
-                                }}
-                            />
-
-                        )}
-
                     </div>
 
                     <ChatInput
@@ -130,13 +152,9 @@ function ChatBot() {
                     />
 
                 </div>
-
             )}
-
         </>
-
     );
-
 }
 
 export default ChatBot;
