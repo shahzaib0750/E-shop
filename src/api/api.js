@@ -1,5 +1,5 @@
 const API_URL =
-  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+  import.meta.env.VITE_API_URL || "http://13.63.58.143";
 
 export const apiFetch = async (endpoint, options = {}) => {
   const token = localStorage.getItem("token");
