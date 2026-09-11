@@ -1,6 +1,4 @@
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://13.63.58.143";
-
+const API_URL = "https://dejanw4nqhfxe.cloudfront.net";
 export const apiFetch = async (endpoint, options = {}) => {
   const token = localStorage.getItem("token");
 
