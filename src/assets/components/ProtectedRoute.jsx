@@ -1,6 +1,5 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-
+import { useAuth } from "../../context/useAuth";
 /**
  * Client-side route guard. Redirects logged-out visitors to /login and
  * keeps the requested path so login can send them back.

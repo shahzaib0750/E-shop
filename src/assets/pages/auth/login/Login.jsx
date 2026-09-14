@@ -2,7 +2,7 @@ import "./Login.css";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { apiFetch } from "../../../../api/api";
-import { useAuth } from "../../../../context/AuthContext";
+import { useAuth } from "../../../../context/useAuth";
 
 function Login() {
   const navigate = useNavigate();

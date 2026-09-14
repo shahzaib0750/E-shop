@@ -1,3 +1,4 @@
+
 import "./Wishlist.css";
 
 import { useCallback, useEffect, useState } from "react";
@@ -66,7 +67,6 @@ function Wishlist() {
       );
     } catch (error) {
       console.error("Wishlist error:", error);
-
       setError("Unable to connect to server.");
     } finally {
       setLoading(false);
@@ -78,6 +78,9 @@ function Wishlist() {
   // ==========================================
 
   useEffect(() => {
+    // This effect intentionally loads data when
+    // the Wishlist page is mounted.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchWishlist();
   }, [fetchWishlist]);
 
@@ -501,3 +504,5 @@ function Wishlist() {
 }
 
 export default Wishlist;
+
+

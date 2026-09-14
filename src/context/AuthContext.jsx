@@ -1,12 +1,5 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
-
-const AuthContext = createContext(null);
+import { useCallback, useMemo, useState } from "react";
+import { AuthContext } from "./authContext";
 
 function getStoredUser() {
   try {
@@ -31,7 +24,11 @@ export function AuthProvider({ children }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, login, logout }),
+    () => ({
+      user,
+      login,
+      logout,
+    }),
     [user, login, logout]
   );
 
@@ -40,14 +37,4 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error("useAuth must be used inside AuthProvider");
-  }
-
-  return context;
 }
