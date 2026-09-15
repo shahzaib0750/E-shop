@@ -78,18 +78,25 @@ function ChatBot() {
     return (
         <>
             <button
-                className="chat-toggle"
-                onClick={() => setOpen(!open)}
-            >
-                {open ? <FaTimes /> : <FaRobot />}
-            </button>
-
+    className="chat-toggle"
+    onClick={() => setOpen(!open)}
+    aria-label={open ? "Close chat" : "Open chat"}
+>
+    {open ? <FaTimes /> : <FaRobot />}
+</button>
             {open && (
                 <div className="chat-window">
 
                     <div className="chat-header">
-                        🤖 AI Shopping Assistant
-                    </div>
+    <div className="chat-header-icon">
+        <FaRobot />
+    </div>
+
+    <div className="chat-header-content">
+        <strong>AI Shopping Assistant</strong>
+    
+    </div>
+</div>
 
                     <div className="chat-body">
                         {messages.map((msg, index) => (
