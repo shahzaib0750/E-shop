@@ -230,3 +230,124 @@ Available Products:
     )
 
     return response.choices[0].message.content
+
+def detect_action(message: str):
+    text = message.lower().strip()
+
+    # Reorder
+    if (
+        "reorder" in text
+        or "order again" in text
+        or "buy again" in text
+    ):
+        return "reorder"
+
+    # Place order
+    if (
+        "place my order" in text
+        or "place order" in text
+        or "checkout" in text
+        or "check out" in text
+        or "buy everything in my cart" in text
+        or "purchase my cart" in text
+    ):
+        return "place_order"
+
+    # Cancel order
+    if (
+        "cancel order" in text
+        or "cancel my order" in text
+        or "cancel the order" in text
+    ):
+        return "cancel_order"
+
+    # Order details
+    if (
+        (
+            "order details" in text
+            or "details of order" in text
+            or "show order" in text
+            or "view order" in text
+        )
+        and re.search(r"(?:order\s*#?\s*|#)\d+", text)
+    ):
+        return "order_details"
+
+    # Order history
+    if (
+        "order history" in text
+        or "my orders" in text
+        or "show my orders" in text
+        or "view my orders" in text
+        or "previous orders" in text
+        or "past orders" in text
+    ):
+        return "orders"
+
+    # Wishlist
+    if (
+        "show my wishlist" in text
+        or "view my wishlist" in text
+        or "my wishlist" in text
+        or "wishlist items" in text
+    ):
+        return "wishlist"
+
+    if (
+        "remove from wishlist" in text
+        or "delete from wishlist" in text
+        or "remove from my wishlist" in text
+    ):
+        return "remove_wishlist"
+
+    if (
+        "add to wishlist" in text
+        or "add this to wishlist" in text
+        or "save to wishlist" in text
+        or "save this to wishlist" in text
+    ):
+        return "add_wishlist"
+
+    # Cart viewing
+    if (
+        "show my cart" in text
+        or "view my cart" in text
+        or "what is in my cart" in text
+        or "what's in my cart" in text
+        or "whats in my cart" in text
+        or "cart contents" in text
+    ):
+        return "view_cart"
+
+    # Remove from cart
+    if (
+        "remove from cart" in text
+        or "remove from my cart" in text
+        or "delete from cart" in text
+        or "delete from my cart" in text
+        or "take out of my cart" in text
+    ):
+        return "remove_cart"
+
+    # Update cart quantity
+    if (
+        "change quantity" in text
+        or "update quantity" in text
+        or "set quantity" in text
+        or "change the quantity" in text
+        or re.search(r"\bquantity\s+(?:to|=)\s*\d+", text)
+    ):
+        return "update_cart"
+
+    # Add to cart
+    if (
+        "add to cart" in text
+        or "add this to cart" in text
+        or "add this product" in text
+        or "put in cart" in text
+        or "put it in my cart" in text
+        or "add it to my cart" in text
+    ):
+        return "add_cart"
+
+    return None
