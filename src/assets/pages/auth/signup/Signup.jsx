@@ -1,3 +1,4 @@
+
 import "./Signup.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -92,6 +93,7 @@ function Signup() {
     }
 
     if (formData.password !== formData.confirmPassword) {
+      setErrorMessage("Passwords do not match.");
       return;
     }
 
@@ -187,6 +189,7 @@ function Signup() {
       }, 1500);
     } catch (error) {
       console.error("Signup error:", error);
+
       setErrorMessage(
         error.message || "Something went wrong. Please try again."
       );
@@ -197,8 +200,18 @@ function Signup() {
 
   return (
     <div className="signup-page">
-      <div className="signup-card">
-        <h1>Create Account</h1>
+      <div
+        className={`signup-card ${
+          formData.role === "seller" ? "seller-mode" : ""
+        }`}
+      >
+        <div className="signup-header">
+          <h1>Create Account</h1>
+
+          <p className="signup-intro">
+            Create your account to get started with E-Shop.
+          </p>
+        </div>
 
         {successMessage && (
           <div className="signup-success">
@@ -212,186 +225,10 @@ function Signup() {
           </div>
         )}
 
-        <p className="signup-intro">
-          Create your account to get started with E-Shop.
-        </p>
-
         <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <label>Name</label>
-
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Enter your name"
-              maxLength={100}
-              required
-            />
-          </div>
-
-          <div className="input-group">
-            <label>Phone</label>
-
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="Enter your phone number"
-              maxLength={20}
-              required
-            />
-          </div>
-
-          <div className="input-group">
-            <label>Email</label>
-
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              maxLength={150}
-              required
-            />
-          </div>
-
-          <div className="input-group">
-            <label>Password</label>
-
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Create a password"
-              maxLength={128}
-              required
-            />
-
-            <div className="password-rules">
-  <span className={rules.length ? "valid" : "invalid"}>
-    {rules.length ? "✓" : "○"} 8+ characters
-  </span>
-
-  <span className={rules.uppercase ? "valid" : "invalid"}>
-    {rules.uppercase ? "✓" : "○"} Uppercase
-  </span>
-
-  <span className={rules.lowercase ? "valid" : "invalid"}>
-    {rules.lowercase ? "✓" : "○"} Lowercase
-  </span>
-
-  <span className={rules.number ? "valid" : "invalid"}>
-    {rules.number ? "✓" : "○"} Number
-  </span>
-
-  <span className={rules.special ? "valid" : "invalid"}>
-    {rules.special ? "✓" : "○"} Special character
-  </span>
-</div>
-          </div>
-
-          <div className="input-group">
-            <label>Confirm Password</label>
-
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm your password"
-              maxLength={128}
-              required
-              className={
-                passwordsMatch
-                  ? "password-match"
-                  : passwordsDoNotMatch
-                    ? "password-mismatch"
-                    : ""
-              }
-            />
-
-            {passwordsMatch && (
-              <p className="password-status match">
-                <span>✓</span>
-                Passwords match
-              </p>
-            )}
-
-            {passwordsDoNotMatch && (
-              <p className="password-status mismatch">
-                <span>✕</span>
-                Passwords do not match
-              </p>
-            )}
-          </div>
-
-          {formData.role === "seller" && (
-            <>
-              <div className="input-group">
-                <label>Business Name</label>
-
-                <input
-                  type="text"
-                  name="business_name"
-                  value={formData.business_name}
-                  onChange={handleChange}
-                  placeholder="Enter your business name"
-                  maxLength={150}
-                  required
-                />
-              </div>
-
-              <div className="input-group">
-                <label>Business Type</label>
-
-                <input
-                  type="text"
-                  name="business_type"
-                  value={formData.business_type}
-                  onChange={handleChange}
-                  placeholder="e.g. Sole Proprietor, LLC, Pvt Ltd"
-                  maxLength={100}
-                  required
-                />
-              </div>
-
-              <div className="input-group">
-                <label>Category</label>
-
-                <input
-                  type="text"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  placeholder="e.g. Electronics, Fashion"
-                  maxLength={100}
-                  required
-                />
-              </div>
-
-              <div className="input-group">
-                <label>CNIC</label>
-
-                <input
-                  type="text"
-                  name="cnic"
-                  value={formData.cnic}
-                  onChange={handleChange}
-                  placeholder="Enter your CNIC"
-                  maxLength={20}
-                  required
-                />
-              </div>
-            </>
-          )}
-
-          <div className="input-group">
-            <label>Account Type</label>
+          {/* Account Type */}
+          <div className="account-type">
+            <label className="section-label">Account Type</label>
 
             <div className="roles">
               <label
@@ -432,6 +269,199 @@ function Signup() {
             </div>
           </div>
 
+          {/* Main Information */}
+          <div className="form-grid">
+            {/* Name */}
+            <div className="input-group">
+              <label>Name</label>
+
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Enter your name"
+                maxLength={100}
+                required
+              />
+            </div>
+
+            {/* Phone */}
+            <div className="input-group">
+              <label>Phone</label>
+
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="Enter your phone number"
+                maxLength={20}
+                required
+              />
+            </div>
+
+            {/* Email */}
+            <div className="input-group">
+              <label>Email</label>
+
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter your email"
+                maxLength={150}
+                required
+              />
+            </div>
+
+            {/* Password */}
+            <div className="input-group password-field">
+              <label>Password</label>
+
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Create a password"
+                maxLength={128}
+                required
+              />
+
+              <div className="password-rules">
+                <span className={rules.length ? "valid" : "invalid"}>
+                  {rules.length ? "✓" : "○"} 8+
+                </span>
+
+                <span className={rules.uppercase ? "valid" : "invalid"}>
+                  {rules.uppercase ? "✓" : "○"} Uppercase
+                </span>
+
+                <span className={rules.lowercase ? "valid" : "invalid"}>
+                  {rules.lowercase ? "✓" : "○"} Lowercase
+                </span>
+
+                <span className={rules.number ? "valid" : "invalid"}>
+                  {rules.number ? "✓" : "○"} Number
+                </span>
+
+                <span className={rules.special ? "valid" : "invalid"}>
+                  {rules.special ? "✓" : "○"} Special
+                </span>
+              </div>
+            </div>
+
+            {/* Confirm Password */}
+            <div className="input-group">
+              <label>Confirm Password</label>
+
+              <input
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm your password"
+                maxLength={128}
+                required
+                className={
+                  passwordsMatch
+                    ? "password-match"
+                    : passwordsDoNotMatch
+                      ? "password-mismatch"
+                      : ""
+                }
+              />
+
+              {passwordsMatch && (
+                <p className="password-status match">
+                  <span>✓</span>
+                  Passwords match
+                </p>
+              )}
+
+              {passwordsDoNotMatch && (
+                <p className="password-status mismatch">
+                  <span>✕</span>
+                  Passwords do not match
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Seller Information */}
+          {formData.role === "seller" && (
+            <div className="seller-section">
+              <div className="seller-heading">
+                Seller Information
+              </div>
+
+              <div className="seller-grid">
+                {/* Business Name */}
+                <div className="input-group">
+                  <label>Business Name</label>
+
+                  <input
+                    type="text"
+                    name="business_name"
+                    value={formData.business_name}
+                    onChange={handleChange}
+                    placeholder="Enter your business name"
+                    maxLength={150}
+                    required
+                  />
+                </div>
+
+                {/* Business Type */}
+                <div className="input-group">
+                  <label>Business Type</label>
+
+                  <input
+                    type="text"
+                    name="business_type"
+                    value={formData.business_type}
+                    onChange={handleChange}
+                    placeholder="e.g. Sole Proprietor, LLC"
+                    maxLength={100}
+                    required
+                  />
+                </div>
+
+                {/* Category */}
+                <div className="input-group">
+                  <label>Category</label>
+
+                  <input
+                    type="text"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    placeholder="e.g. Electronics, Fashion"
+                    maxLength={100}
+                    required
+                  />
+                </div>
+
+                {/* CNIC */}
+                <div className="input-group">
+                  <label>CNIC</label>
+
+                  <input
+                    type="text"
+                    name="cnic"
+                    value={formData.cnic}
+                    onChange={handleChange}
+                    placeholder="Enter your CNIC"
+                    maxLength={20}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Terms */}
           <div className="checkbox">
             <label>
               <input
@@ -441,7 +471,7 @@ function Signup() {
                 onChange={handleChange}
               />
 
-              I agree to the Terms & Conditions
+              <span>I agree to the Terms & Conditions</span>
             </label>
 
             {termsError && (
@@ -451,6 +481,7 @@ function Signup() {
             )}
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
             className="signup-btn"
@@ -466,9 +497,7 @@ function Signup() {
 
         <p className="bottom-text">
           Already have an account?{" "}
-          <Link to="/login">
-            Login
-          </Link>
+          <Link to="/login">Login</Link>
         </p>
       </div>
     </div>
@@ -476,3 +505,4 @@ function Signup() {
 }
 
 export default Signup;
+
