@@ -1,38 +1,37 @@
-
 import "./Signup.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { apiFetch } from "../../../../api/api";
 
-const passwordRules = (password) => ({
-  length: password.length >= 8,
-  uppercase: /[A-Z]/.test(password),
-  lowercase: /[a-z]/.test(password),
-  number: /[0-9]/.test(password),
-  special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
-});
-
 function Signup() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    full_name: "",
-    email: "",
+    name: "",
     phone: "",
+    email: "",
     password: "",
     confirmPassword: "",
-
     role: "customer",
-
     business_name: "",
     business_type: "",
     category: "",
     cnic: "",
-
     agree: false,
   });
 
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [termsError, setTermsError] = useState("");
 
-  const rules = passwordRules(formData.password);
+  const [rules, setRules] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    special: false,
+  });
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -41,86 +40,64 @@ function Signup() {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+
+    if (name === "password") {
+      setRules({
+        length: value.length >= 8,
+        uppercase: /[A-Z]/.test(value),
+        lowercase: /[a-z]/.test(value),
+        number: /[0-9]/.test(value),
+        special: /[^A-Za-z0-9]/.test(value),
+      });
+    }
+
+    if (name === "agree" && checked) {
+      setTermsError("");
+    }
+
+    if (successMessage) {
+      setSuccessMessage("");
+    }
+
+    if (errorMessage) {
+      setErrorMessage("");
+    }
   };
+
+  const passwordsMatch =
+    formData.confirmPassword.length > 0 &&
+    formData.password === formData.confirmPassword;
+
+  const passwordsDoNotMatch =
+    formData.confirmPassword.length > 0 &&
+    formData.password !== formData.confirmPassword;
+
+  const allPasswordRulesPassed =
+    rules.length &&
+    rules.uppercase &&
+    rules.lowercase &&
+    rules.number &&
+    rules.special;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (loading) {
-      return;
-    }
+    setSuccessMessage("");
+    setErrorMessage("");
+    setTermsError("");
 
-    if (!formData.agree) {
-      alert("Please accept the Terms & Conditions.");
-      return;
-    }
-
-    if (!Object.values(rules).every(Boolean)) {
-      alert("Please create a stronger password.");
+    if (!allPasswordRulesPassed) {
+      setErrorMessage("Please meet all password requirements.");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match.");
       return;
     }
 
-    const fullName = formData.full_name.trim();
-    const email = formData.email.trim().toLowerCase();
-    const phone = formData.phone.trim();
-
-    if (fullName.length < 2) {
-      alert("Full name must contain at least 2 characters.");
+    if (!formData.agree) {
+      setTermsError("Please agree to the Terms & Conditions.");
       return;
-    }
-
-    if (phone.length < 11) {
-      alert("Phone number must contain at least 11 characters.");
-      return;
-    }
-
-    const payload = {
-      full_name: fullName,
-      email: email,
-      phone: phone,
-      password: formData.password,
-      role: formData.role,
-    };
-
-    if (formData.role === "customer") {
-      payload.customer_type = "standard";
-    }
-
-    if (formData.role === "seller") {
-      const businessName = formData.business_name.trim();
-      const businessType = formData.business_type.trim();
-      const category = formData.category.trim();
-      const cnic = formData.cnic.trim();
-
-      if (!businessName) {
-        alert("Business name is required.");
-        return;
-      }
-
-      if (!businessType) {
-        alert("Business type is required.");
-        return;
-      }
-
-      if (!category) {
-        alert("Business category is required.");
-        return;
-      }
-
-      if (!cnic) {
-        alert("CNIC is required.");
-        return;
-      }
-
-      payload.business_name = businessName;
-      payload.business_type = businessType;
-      payload.category = category;
-      payload.cnic = cnic;
     }
 
     setLoading(true);
@@ -128,82 +105,90 @@ function Signup() {
     try {
       const response = await apiFetch("/signup", {
         method: "POST",
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          full_name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+          business_name:
+            formData.role === "seller"
+              ? formData.business_name
+              : null,
+          business_type:
+            formData.role === "seller"
+              ? formData.business_type
+              : null,
+          category:
+            formData.role === "seller"
+              ? formData.category
+              : null,
+          cnic:
+            formData.role === "seller"
+              ? formData.cnic
+              : null,
+        }),
       });
 
       const data = await response.json();
 
-      if (response.ok) {
-        alert("Account created successfully!");
+      if (!response.ok) {
+        let errorMessageText =
+          "Account creation failed. Please try again.";
 
-        setFormData({
-          full_name: "",
-          email: "",
-          phone: "",
-          password: "",
-          confirmPassword: "",
-
-          role: "customer",
-
-          business_name: "",
-          business_type: "",
-          category: "",
-          cnic: "",
-
-          agree: false,
-        });
-
-        return;
-      }
-
-      if (response.status === 422) {
         if (Array.isArray(data.detail)) {
-          const messages = data.detail
+          errorMessageText = data.detail
             .map((error) => {
               const field =
-                error.loc?.[error.loc.length - 1] || "field";
+                Array.isArray(error.loc) && error.loc.length > 0
+                  ? error.loc[error.loc.length - 1]
+                  : "Field";
 
               return `${field}: ${error.msg}`;
             })
-            .join("\n");
-
-          alert(messages);
-        } else {
-          alert(data.detail || "Invalid signup data.");
+            .join(", ");
+        } else if (typeof data.detail === "string") {
+          errorMessageText = data.detail;
+        } else if (data.detail) {
+          errorMessageText = JSON.stringify(data.detail);
         }
 
-        return;
+        throw new Error(errorMessageText);
       }
 
-      if (response.status === 400) {
-        alert(
-          data.detail ||
-            "Unable to create account."
-        );
-
-        return;
-      }
-
-      if (response.status === 500) {
-        console.error("Server error:", data);
-
-        alert(
-          data.detail ||
-            "Server error. Check the FastAPI terminal."
-        );
-
-        return;
-      }
-
-      alert(
-        data.detail ||
-          "Unable to create account."
+      setSuccessMessage(
+        "Account created successfully! Redirecting to login..."
       );
-    } catch (error) {
-      console.error("Signup request error:", error);
 
-      alert(
-        "Unable to connect to the backend server."
+      setFormData({
+        name: "",
+        phone: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        role: "customer",
+        business_name: "",
+        business_type: "",
+        category: "",
+        cnic: "",
+        agree: false,
+      });
+
+      setRules({
+        length: false,
+        uppercase: false,
+        lowercase: false,
+        number: false,
+        special: false,
+      });
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+    } catch (error) {
+      console.error("Signup error:", error);
+      setErrorMessage(
+        error.message || "Something went wrong. Please try again."
       );
     } finally {
       setLoading(false);
@@ -213,36 +198,49 @@ function Signup() {
   return (
     <div className="signup-page">
       <div className="signup-card">
-
         <h1>Create Account</h1>
 
+        {successMessage && (
+          <div className="signup-success">
+            {successMessage}
+          </div>
+        )}
+
+        {errorMessage && (
+          <div className="signup-error">
+            {errorMessage}
+          </div>
+        )}
+
         <p className="signup-intro">
-          {formData.role === "seller"
-            ? "Create a seller account to manage products, orders, and your store."
-            : "Create a customer account to browse products and place orders."}
+          Create your account to get started with E-Shop.
         </p>
 
-        <form onSubmit={handleSubmit} noValidate>
-
+        <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <label>
-              {formData.role === "seller"
-                ? "Store Owner Name"
-                : "Full Name"}
-            </label>
+            <label>Name</label>
 
             <input
               type="text"
-              name="full_name"
-              value={formData.full_name}
+              name="name"
+              value={formData.name}
               onChange={handleChange}
-              placeholder={
-                formData.role === "seller"
-                  ? "Enter your store owner name"
-                  : "Enter your full name"
-              }
-              minLength={2}
+              placeholder="Enter your name"
               maxLength={100}
+              required
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Phone</label>
+
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="Enter your phone number"
+              maxLength={20}
               required
             />
           </div>
@@ -256,25 +254,7 @@ function Signup() {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email"
-              required
-            />
-          </div>
-
-          <div className="input-group">
-            <label>
-              {formData.role === "seller"
-                ? "Business Phone Number"
-                : "Phone Number"}
-            </label>
-
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="03XX XXXXXXX"
-              minLength={11}
-              maxLength={15}
+              maxLength={150}
               required
             />
           </div>
@@ -287,33 +267,32 @@ function Signup() {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Create password"
-              minLength={8}
+              placeholder="Create a password"
               maxLength={128}
               required
             />
 
             <div className="password-rules">
-              <p className={rules.length ? "valid" : "invalid"}>
-                {rules.length ? "✓" : "✗"} At least 8 characters
-              </p>
+  <span className={rules.length ? "valid" : "invalid"}>
+    {rules.length ? "✓" : "○"} 8+ characters
+  </span>
 
-              <p className={rules.uppercase ? "valid" : "invalid"}>
-                {rules.uppercase ? "✓" : "✗"} One uppercase letter
-              </p>
+  <span className={rules.uppercase ? "valid" : "invalid"}>
+    {rules.uppercase ? "✓" : "○"} Uppercase
+  </span>
 
-              <p className={rules.lowercase ? "valid" : "invalid"}>
-                {rules.lowercase ? "✓" : "✗"} One lowercase letter
-              </p>
+  <span className={rules.lowercase ? "valid" : "invalid"}>
+    {rules.lowercase ? "✓" : "○"} Lowercase
+  </span>
 
-              <p className={rules.number ? "valid" : "invalid"}>
-                {rules.number ? "✓" : "✗"} One number
-              </p>
+  <span className={rules.number ? "valid" : "invalid"}>
+    {rules.number ? "✓" : "○"} Number
+  </span>
 
-              <p className={rules.special ? "valid" : "invalid"}>
-                {rules.special ? "✓" : "✗"} One special character
-              </p>
-            </div>
+  <span className={rules.special ? "valid" : "invalid"}>
+    {rules.special ? "✓" : "○"} Special character
+  </span>
+</div>
           </div>
 
           <div className="input-group">
@@ -324,10 +303,31 @@ function Signup() {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              placeholder="Confirm password"
+              placeholder="Confirm your password"
               maxLength={128}
               required
+              className={
+                passwordsMatch
+                  ? "password-match"
+                  : passwordsDoNotMatch
+                    ? "password-mismatch"
+                    : ""
+              }
             />
+
+            {passwordsMatch && (
+              <p className="password-status match">
+                <span>✓</span>
+                Passwords match
+              </p>
+            )}
+
+            {passwordsDoNotMatch && (
+              <p className="password-status mismatch">
+                <span>✕</span>
+                Passwords do not match
+              </p>
+            )}
           </div>
 
           {formData.role === "seller" && (
@@ -394,7 +394,6 @@ function Signup() {
             <label>Account Type</label>
 
             <div className="roles">
-
               <label
                 className={
                   formData.role === "customer"
@@ -430,7 +429,6 @@ function Signup() {
 
                 <span>Seller</span>
               </label>
-
             </div>
           </div>
 
@@ -445,6 +443,12 @@ function Signup() {
 
               I agree to the Terms & Conditions
             </label>
+
+            {termsError && (
+              <p className="terms-error">
+                {termsError}
+              </p>
+            )}
           </div>
 
           <button
@@ -458,17 +462,14 @@ function Signup() {
                 ? "Create Seller Account"
                 : "Create Customer Account"}
           </button>
-
         </form>
 
         <p className="bottom-text">
           Already have an account?{" "}
-
           <Link to="/login">
             Login
           </Link>
         </p>
-
       </div>
     </div>
   );
